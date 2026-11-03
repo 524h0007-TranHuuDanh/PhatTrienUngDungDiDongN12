@@ -1,18 +1,15 @@
 @echo off
-REM ============================================================
-REM Tự động forward emulator:8080 -> host:8080.
-REM Cần chạy lại MỖI KHI emulator restart.
-REM ============================================================
+chcp 65001 >nul
+echo Dang cho emulator khoi dong...
+set ADB_PATH="%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe"
 
-echo → Chờ emulator boot...
-adb wait-for-device
+%ADB_PATH% wait-for-device
 timeout /t 2 /nobreak > nul
-
-adb reverse tcp:8080 tcp:8080
+%ADB_PATH% reverse tcp:8080 tcp:8080
 
 echo.
-echo Đã forward emulator:8080 -^> host:8080
-echo Danh sách forward đang active:
-adb reverse --list
+echo [OK] Da forward emulator:8080 -^> host:8080
+echo Danh sach forward dang active:
+%ADB_PATH% reverse --list
 
 pause

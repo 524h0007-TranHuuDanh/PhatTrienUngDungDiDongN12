@@ -74,15 +74,15 @@ async function main() {
         id: movementId,
         operation: "UPDATE",
         mutation_id: randomUUID(),
-        base_version: 1,
+        base_version: 1, 
         local_rev: 2,
         product_id: productId,
         product_name: productName,
-        type,
-        quantity,
-        batch_code: "",
+        type: type,
+        quantity: quantity,
+        batch_code: type === "IN" ? "BATCH-CONFLICT-TEST" : "", 
         partner: "CLI conflict test",
-        note: "Cập nhật từ thiết bị A để kiểm thử xung đột",
+        note: "Cập nhật từ thiết bị B để kiểm thử xung đột",
         status: "DRAFT",
         is_deleted: false,
         created_at: now,
@@ -124,7 +124,7 @@ async function main() {
     console.log(`Server quantity: ${quantity}`);
     console.log("\nBây giờ hãy quay lại Android:");
     console.log("1. Giữ nguyên phiếu local đang ở version 1.");
-    console.log("2. Chỉnh sửa phiếu local.");
+    console.log("2. Chỉnh sửa phiếu local trên app.");
     console.log("3. Nhấn Đồng bộ ngay để kiểm tra HTTP 409.");
 }
 

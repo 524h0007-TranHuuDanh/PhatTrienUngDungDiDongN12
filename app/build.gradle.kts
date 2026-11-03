@@ -116,13 +116,25 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
+
+
+val sdkPath = readLocalProperty("sdk.dir") ?: ""
+val isWindows = System.getProperty("os.name").lowercase().contains("windows")
+val adbExecutable = if (isWindows) "adb.exe" else "adb"
+val adbFile = if (sdkPath.isNotEmpty()) {
+    file("$sdkPath/platform-tools/$adbExecutable")
+} else {
+    file(adbExecutable)
+}
+
 tasks.register<Exec>("adbReverse") {
     group = "coffeestock"
     description = "Forward emulator tcp:8080 → host tcp:8080"
-    commandLine("adb", "reverse", "tcp:8080", "tcp:8080")
-    isIgnoreExitValue = true
     doFirst { println("→ adb reverse tcp:8080 tcp:8080") }
     doLast  { println("adb reverse OK (bỏ qua nếu log không lỗi)") }
+
+    commandLine(adbFile.absolutePath, "reverse", "tcp:8080", "tcp:8080")
+    isIgnoreExitValue = true
 }
 
 tasks.matching {
