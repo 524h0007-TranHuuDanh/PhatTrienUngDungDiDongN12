@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
-
 fun readLocalProperty(name: String): String? {
     val file = rootProject.file("local.properties")
     if (!file.exists()) return null
@@ -57,8 +56,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner =
-            "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -75,6 +73,22 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    // === FIX: Xung đột META-INF/LICENSE.md giữa MockK và JUnit5 ===
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE-notice",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE.md",
+                "META-INF/NOTICE.txt",
+                "META-INF/DEPENDENCIES"
+            )
+        }
     }
 }
 
@@ -113,10 +127,15 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    androidTestImplementation(libs.mockk.android)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
-
-
 
 val sdkPath = readLocalProperty("sdk.dir") ?: ""
 val isWindows = System.getProperty("os.name").lowercase().contains("windows")

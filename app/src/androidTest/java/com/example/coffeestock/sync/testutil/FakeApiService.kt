@@ -8,6 +8,8 @@ import com.example.coffeestock.data.remote.dto.PushResponseDto
 import com.example.coffeestock.data.remote.dto.PushResultDto
 import com.example.coffeestock.data.remote.dto.RemoteMovementDto
 import com.example.coffeestock.data.remote.dto.SyncErrorDto
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -15,7 +17,15 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class FakeApiService : ApiService {
 
-    enum class FailMode { NONE, TIMEOUT, IO_ERROR }
+    enum class FailMode {
+        NONE,
+        TIMEOUT,
+        IO_ERROR,
+        HTTP_408,
+        HTTP_429,
+        HTTP_500,
+        HTTP_503
+    }
 
     val records = mutableMapOf<String, RemoteMovementDto>()
     val mutationCache = mutableMapOf<String, PushResultDto>()
@@ -39,6 +49,10 @@ class FakeApiService : ApiService {
         when (failPushMode) {
             FailMode.TIMEOUT -> throw SocketTimeoutException("push timeout")
             FailMode.IO_ERROR -> throw IOException("push io")
+            FailMode.HTTP_408 -> return httpError(408, "request timeout")
+            FailMode.HTTP_429 -> return httpError(429, "rate limited")
+            FailMode.HTTP_500 -> return httpError(500, "internal server error")
+            FailMode.HTTP_503 -> return httpError(503, "service unavailable")
             FailMode.NONE -> { }
         }
         val results = request.items.map { processPush(it) }
@@ -54,6 +68,10 @@ class FakeApiService : ApiService {
         when (failPullMode) {
             FailMode.TIMEOUT -> throw SocketTimeoutException("pull timeout")
             FailMode.IO_ERROR -> throw IOException("pull io")
+            FailMode.HTTP_408 -> return httpError(408, "request timeout")
+            FailMode.HTTP_429 -> return httpError(429, "rate limited")
+            FailMode.HTTP_500 -> return httpError(500, "internal server error")
+            FailMode.HTTP_503 -> return httpError(503, "service unavailable")
             FailMode.NONE -> { }
         }
         val changes = records.values
@@ -146,5 +164,10 @@ class FakeApiService : ApiService {
         )
         mutationCache[item.mutationId] = result
         return result
+    }
+
+    private fun <T> httpError(code: Int, message: String): Response<T> {
+        val json = """{"error":{"code":"TEST_HTTP_$code","message":"$message"}}"""
+        return Response.error(code, json.toResponseBody("application/json".toMediaType()))
     }
 }

@@ -35,7 +35,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
 
         private val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
             }
         }
 
@@ -50,7 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "coffeestock_database"
                 )
                     .addMigrations(MIGRATION_1_2)
-                    .fallbackToDestructiveMigrationOnDowngrade()
+                    .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                     .build()
 
                 INSTANCE = instance
