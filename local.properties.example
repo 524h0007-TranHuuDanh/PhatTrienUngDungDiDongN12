@@ -1,0 +1,21 @@
+# Copy file này thành local.properties rồi sửa cho máy của bạn.
+# local.properties KHÔNG commit Git (đã trong .gitignore).
+
+# Đường dẫn Android SDK (tự sinh bởi Android Studio, không cần sửa nếu đã có)
+# Windows: C\:\\Users\\<YourName>\\AppData\\Local\\Android\\Sdk
+# Linux/Mac: /home/<you>/Android/Sdk
+# sdk.dir=/path/to/Android/sdk
+
+# CoffeeStock — cấu hình kết nối server
+
+# EMULATOR (firewall chặn 10.0.2.2 → phải dùng 127.0.0.1 + adb reverse)
+COFFEESTOCK_API_BASE_URL=http://127.0.0.1:8080/
+
+# THIẾT BỊ THẬT — dùng IP LAN của máy tính, cùng WiFi
+# COFFEESTOCK_API_BASE_URL=http://192.168.1.10:8080/
+
+# NẾU ĐÃ MỞ FIREWALL PORT 8080 — có thể dùng alias của emulator
+# COFFEESTOCK_API_BASE_URL=http://10.0.2.2:8080/
+
+# API key — khớp với server/.env (mặc định: coffeestock-dev-key)
+COFFEESTOCK_API_KEY=coffeestock-dev-key

@@ -34,11 +34,8 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
 
-        // Phiên bản 2 không đổi cấu trúc bảng; migration này giữ nguyên dữ liệu
-        // của database phiên bản 1 đã cài trên thiết bị.
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // No schema changes in version 2.
             }
         }
 

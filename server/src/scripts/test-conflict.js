@@ -8,12 +8,6 @@ const BASE_URL = (
 
 const API_KEY = process.env.API_KEY;
 
-// Cách chạy:
-// node src/scripts/test-conflict.js <movementId> <productId> <productName> <type> <quantity>
-//
-// Ví dụ:
-// node src/scripts/test-conflict.js abc-123 coffee-01 "Arabica" OUT 8
-
 const [
     movementId,
     productId,

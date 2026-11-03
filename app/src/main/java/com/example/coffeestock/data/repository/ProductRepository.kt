@@ -53,7 +53,6 @@ class ProductRepository(
         productDao.insertProduct(product)
     }
 
-    // Lấy danh sách mặt hàng kèm số lượng tồn.
     fun getProductsWithStock(): Flow<List<ProductStock>> {
 
         return combine(
@@ -93,11 +92,9 @@ class ProductRepository(
         }
     }
 
-    // Lấy danh sách mặt hàng.
     fun getAllProducts() =
         productDao.getAllProducts()
 
-    // Lấy mặt hàng theo ID.
     suspend fun getProductById(productId: String) =
         productDao.getProductById(productId)
 }

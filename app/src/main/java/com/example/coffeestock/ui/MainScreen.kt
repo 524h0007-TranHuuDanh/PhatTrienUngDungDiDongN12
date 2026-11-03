@@ -88,7 +88,6 @@ fun MainScreen(viewModel: CoffeeStockViewModel) {
                         )
                     }
                     Button(onClick = {
-                        // Tác vụ chạy trong coroutine do Compose quản lý.
                         coroutineScope.launch { viewModel.syncNow() }
                     }) { Text("Đồng bộ ngay") }
                 }
@@ -451,7 +450,6 @@ private fun MovementScreen(
         }
     }
 
-    // Dialog tạo phiếu
     if (showCreateDialog) {
         AlertDialog(
             onDismissRequest = { showCreateDialog = false },
@@ -521,7 +519,6 @@ private fun MovementScreen(
         )
     }
 
-    // Dialog sửa phiếu nháp
     if (showEditDialog && movementToEdit != null) {
         AlertDialog(
             onDismissRequest = {
@@ -632,7 +629,6 @@ private fun MovementScreen(
         )
     }
 
-    // Dialog xác nhận xóa
     if (movementToDelete != null) {
         AlertDialog(
             onDismissRequest = { movementToDelete = null },
@@ -819,7 +815,6 @@ fun MovementItem(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Trạng thái phiếu
             Text(
                 text = when (movement.status) {
                     "DRAFT" -> "Trạng thái: Nháp"
@@ -829,7 +824,6 @@ fun MovementItem(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Trạng thái đồng bộ
             Text(
                 text = when (movement.syncState) {
                     "PENDING" -> "Đồng bộ: Đang chờ"
@@ -842,7 +836,6 @@ fun MovementItem(
                 style = MaterialTheme.typography.bodySmall
             )
 
-            // Chỉ cho phép thao tác với phiếu nháp
             if (movement.status == "DRAFT") {
                 Spacer(modifier = Modifier.height(8.dp))
 

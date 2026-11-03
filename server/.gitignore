@@ -1,34 +1,65 @@
-# Gradle
-.gradle/
-**/build/
-
-# Android Studio
-.idea/
+# Android / Gradle
 *.iml
-
-# Kotlin
+.gradle/
+/build/
+/app/build/
+/captures
+.externalNativeBuild
+.cxx
 .kotlin/
 
-# Local machine configuration
+# Android Studio
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/
+
+# Local machine config — KHÔNG commit (mỗi máy tự set)
 local.properties
 
-# Node.js
+# Build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Keystore
+*.jks
+*.keystore
+keystore.properties
+
+# Node.js / Server
+server/node_modules/
 node_modules/
 
 # Environment secrets
-.env
-.env.*
-!.env.example
+server/.env
+server/.env.*
+!server/.env.example
 
 # Database files
-*.db
-*.db-journal
-*.db-wal
-*.db-shm
+server/data/*.db
+server/data/*.db-journal
+server/data/*.db-wal
+server/data/*.db-shm
 
 # Logs
 *.log
+server/data/*.log
 
-# OS files
+
+# OS / Editor
 .DS_Store
 Thumbs.db
+*.swp
+*.swo
+*~
+.vscode/
+
+# Build artifacts (dùng cho D8)
+docs/screenshots/*.tmp
+docs/demo/*.mp4

@@ -1,9 +1,5 @@
 const syncService = require("../sync/sync.service");
 
-// ========================================
-// ERROR STATUS
-// ========================================
-
 function getErrorStatus(code) {
     switch (code) {
         case "MOVEMENT_NOT_FOUND":
@@ -19,10 +15,6 @@ function getErrorStatus(code) {
             return 422;
     }
 }
-
-// ========================================
-// MUTATION RESPONSE
-// ========================================
 
 function sendMutationResponse(res, result, successStatus) {
     if (!result.ok) {
@@ -43,10 +35,7 @@ function sendMutationResponse(res, result, successStatus) {
     });
 }
 
-// ========================================
 // GET /api/v1/movements
-// ========================================
-
 function getAll(req, res, next) {
     try {
         const items = syncService.getMovements();
@@ -60,10 +49,7 @@ function getAll(req, res, next) {
     }
 }
 
-// ========================================
 // GET /api/v1/movements/:id
-// ========================================
-
 function getById(req, res, next) {
     try {
         const movement = syncService.getMovementById(
@@ -87,10 +73,7 @@ function getById(req, res, next) {
     }
 }
 
-// ========================================
 // POST /api/v1/movements
-// ========================================
-
 function create(req, res, next) {
     try {
         const mutationId = req.get("Idempotency-Key");
@@ -110,10 +93,7 @@ function create(req, res, next) {
     }
 }
 
-// ========================================
 // PUT /api/v1/movements/:id
-// ========================================
-
 function update(req, res, next) {
     try {
         const mutationId = req.get("Idempotency-Key");
@@ -134,10 +114,7 @@ function update(req, res, next) {
     }
 }
 
-// ========================================
 // DELETE /api/v1/movements/:id
-// ========================================
-
 function remove(req, res, next) {
     try {
         const mutationId = req.get("Idempotency-Key");

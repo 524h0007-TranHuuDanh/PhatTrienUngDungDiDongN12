@@ -49,13 +49,6 @@ class SyncEngine(
         )
     }
 
-    /**
-     * PUSH:
-     * Gửi các thay đổi local đang ở trạng thái PENDING.
-     *
-     * FAILED không được tự động gửi lại.
-     * Người dùng phải chủ động yêu cầu đồng bộ lại.
-     */
     suspend fun pushChanges(): SyncResult =
         withContext(Dispatchers.IO) {
 
@@ -323,9 +316,6 @@ class SyncEngine(
             SyncResult.SUCCESS
         }
 
-    /**
-     * Chuyển MovementEntity thành PushMovementDto.
-     */
     private fun MovementEntity.toPushDto(): PushMovementDto {
         return PushMovementDto(
             id = id,
@@ -347,9 +337,6 @@ class SyncEngine(
         )
     }
 
-    /**
-     * Lưu hai phiên bản local/server vào conflict_log.
-     */
     private suspend fun saveConflict(
         local: MovementEntity,
         message: String,
@@ -377,9 +364,6 @@ class SyncEngine(
         )
     }
 
-    /**
-     * Phân tích response lỗi HTTP.
-     */
     private fun parseErrorResponse(
         response: Response<PushResponseDto>
     ): PushResponseDto? {
@@ -404,10 +388,7 @@ class SyncEngine(
         }
     }
 
-    /**
-     * PULL:
-     * Lấy dữ liệu server theo server_seq và cursor.
-     */
+
     suspend fun pullChanges(): SyncResult =
         withContext(Dispatchers.IO) {
 
@@ -419,7 +400,7 @@ class SyncEngine(
                     "Bắt đầu PULL. Cursor hiện tại: $cursor"
                 )
 
-                do {
+                while (true) {
                     val response = apiService.pullChanges(
                         apiKey = apiKey,
                         afterSeq = cursor,
@@ -493,7 +474,8 @@ class SyncEngine(
                                 "số bản ghi: ${page.items.size}"
                     )
 
-                } while (page.hasMore)
+                    if (!page.hasMore) break
+                }
 
                 Log.d(TAG, "Hoàn thành PULL")
 
@@ -525,10 +507,6 @@ class SyncEngine(
             }
         }
 
-    /**
-     * Đồng bộ tổng thể:
-     * PUSH trước, sau đó PULL.
-     */
     suspend fun synchronize(): SyncResult {
 
         Log.d(TAG, "Bắt đầu quá trình đồng bộ")
@@ -563,9 +541,6 @@ class SyncEngine(
         return pullResult
     }
 
-    /**
-     * Xử lý xung đột dựa trên ConflictResolver.
-     */
     private suspend fun resolveConflict(
         local: MovementEntity,
         server: RemoteMovementDto
@@ -655,13 +630,6 @@ class SyncEngine(
         }
     }
 
-    /**
-     * Xác định HTTP status có thể retry.
-     *
-     * 408: Request Timeout
-     * 429: Too Many Requests
-     * 500-599: Server errors
-     */
     private fun isRetryableHttpCode(code: Int): Boolean {
         return code == 408 ||
                 code == 429 ||

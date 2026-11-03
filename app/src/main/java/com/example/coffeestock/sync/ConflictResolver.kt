@@ -22,7 +22,6 @@ object ConflictResolver {
         server: RemoteMovementDto
     ): ConflictDecision {
 
-        // Máy chủ đã xóa: không khôi phục lại phiếu từ local.
         if (server.isDeleted) {
             return ConflictDecision(
                 action = ConflictAction.KEEP_SERVER,
@@ -31,7 +30,6 @@ object ConflictResolver {
             )
         }
 
-        // Phiếu đã xác nhận trên server: không ghi đè bằng bản nháp local.
         if (server.status == "CONFIRMED") {
             return ConflictDecision(
                 action = ConflictAction.KEEP_SERVER,
@@ -40,7 +38,6 @@ object ConflictResolver {
             )
         }
 
-        // Local đã yêu cầu xóa: gửi lại yêu cầu xóa với version mới.
         if (local.isDeleted || local.pendingOp == "DELETE") {
             return ConflictDecision(
                 action = ConflictAction.RETRY_LOCAL_DELETE,
@@ -49,7 +46,6 @@ object ConflictResolver {
             )
         }
 
-        // Local đã xác nhận: giữ bản local và thử gửi lại.
         if (local.status == "CONFIRMED") {
             return ConflictDecision(
                 action = ConflictAction.RETRY_LOCAL,
@@ -58,7 +54,6 @@ object ConflictResolver {
             )
         }
 
-        // Trường hợp còn lại: giữ thay đổi local.
         return ConflictDecision(
             action = ConflictAction.RETRY_LOCAL,
             latestServerVersion = server.serverVersion,

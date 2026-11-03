@@ -47,11 +47,6 @@ class SyncEngineTest {
         database.close()
     }
 
-    /**
-     * Test 1:
-     * PUSH thành công và PULL thành công.
-     * Phiếu local phải chuyển sang SYNCED.
-     */
     @Test
     fun synchronize_pushesPendingMovementAndPullsSuccessfully() =
         runBlocking {
@@ -108,11 +103,6 @@ class SyncEngineTest {
             assertEquals(2L, saved?.serverVersion)
         }
 
-    /**
-     * Test 2:
-     * PUSH gặp lỗi mạng.
-     * SyncEngine phải trả RETRY và đưa phiếu về PENDING.
-     */
     @Test
     fun pushNetworkFailureReturnsRetryAndRestoresPendingState() =
         runBlocking {
@@ -148,11 +138,6 @@ class SyncEngineTest {
             assertEquals("CREATE", saved?.pendingOp)
         }
 
-    /**
-     * Test 3:
-     * PULL nhận một phiếu mới từ server.
-     * Room phải lưu phiếu và cập nhật cursor.
-     */
     @Test
     fun pullInsertsRemoteMovementAndAdvancesCursor() =
         runBlocking {
@@ -202,11 +187,6 @@ class SyncEngineTest {
             )
         }
 
-    /**
-     * Test 4:
-     * PULL gặp lỗi HTTP 503.
-     * SyncEngine phải trả RETRY.
-     */
     @Test
     fun pullHttpErrorReturnsRetry() = runBlocking {
 
@@ -289,9 +269,6 @@ class SyncEngineTest {
         updatedAt = "2026-11-03T00:00:00Z"
     )
 
-    /**
-     * API giả để kiểm thử mà không cần Node.js server.
-     */
     private class FakeApiService(
         private val push:
         suspend (PushRequestDto) -> Response<PushResponseDto>,

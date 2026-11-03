@@ -27,10 +27,6 @@ function normalizeTimestamp(value) {
     return date.toISOString();
 }
 
-// ========================================
-// VALIDATION
-// ========================================
-
 function validateMovement(item) {
     if (
         !item.id ||
@@ -101,8 +97,6 @@ function validateMovement(item) {
         );
     }
 
-    // Phiếu nhập luôn bắt buộc mã lô,
-    // áp dụng cho cả CREATE và UPDATE.
     if (
         item.type === "IN" &&
         (
@@ -170,10 +164,6 @@ function validateMutationId(mutationId) {
     }
 }
 
-// ========================================
-// DATA MAPPING
-// ========================================
-
 function toRemoteMovement(row) {
     if (!row) {
         return null;
@@ -226,27 +216,17 @@ function createSuccessResult(item, movement) {
     };
 }
 
-// ========================================
-// HISTORY
-// ========================================
-
 function saveHistoryAndUpdate(oldMovement, newMovement, now) {
     repository.saveHistory(oldMovement, now);
 
     repository.updateMovement(newMovement);
 }
 
-// ========================================
-// CORE BUSINESS LOGIC
-// Dùng chung cho SYNC và CRUD
-// ========================================
-
 function processOne(item) {
     validateMovement(item);
 
     const now = getNow();
 
-    // Kiểm tra yêu cầu đã được xử lý trước đó.
     const previousResult = repository.getIdempotency(
         item.mutation_id
     );
@@ -256,10 +236,6 @@ function processOne(item) {
     }
 
     const current = repository.getMovement(item.id);
-
-    // ====================================
-    // CREATE
-    // ====================================
 
     if (item.operation === "CREATE") {
         if (current) {
@@ -306,10 +282,6 @@ function processOne(item) {
         return result;
     }
 
-    // ====================================
-    // UPDATE / DELETE
-    // ====================================
-
     if (!current) {
         return createErrorResult(
             item,
@@ -355,17 +327,9 @@ function processOne(item) {
         updated_at: now
     };
 
-    // ====================================
-    // DELETE LOGIC
-    // ====================================
-
     if (item.operation === "DELETE") {
         updated.deleted_at = now;
     }
-
-    // ====================================
-    // UPDATE
-    // ====================================
 
     else {
         updated.product_id = item.product_id;
@@ -400,19 +364,11 @@ function processOne(item) {
     return result;
 }
 
-// ========================================
-// TRANSACTION EXECUTION
-// ========================================
-
 function executeMovement(item) {
     return repository.db.transaction(() => {
         return processOne(item);
     })();
 }
-
-// ========================================
-// SYNC API
-// ========================================
 
 function pushChanges(request) {
     if (
@@ -474,19 +430,11 @@ function pullChanges(afterSeq, limit) {
     };
 }
 
-// ========================================
-// CRUD: GET ALL
-// ========================================
-
 function getMovements() {
     return repository.getAllMovements().map(
         toRemoteMovement
     );
 }
-
-// ========================================
-// CRUD: GET BY ID
-// ========================================
 
 function getMovementById(id) {
     const movement = repository.getMovement(id);
@@ -497,10 +445,6 @@ function getMovementById(id) {
 
     return toRemoteMovement(movement);
 }
-
-// ========================================
-// CRUD: CREATE
-// ========================================
 
 function createMovement(data, mutationId) {
     validateMutationId(mutationId);
@@ -521,10 +465,6 @@ function createMovement(data, mutationId) {
 
     return executeMovement(item);
 }
-
-// ========================================
-// CRUD: UPDATE
-// ========================================
 
 function updateMovement(id, data, mutationId) {
     validateMutationId(mutationId);
@@ -549,10 +489,6 @@ function updateMovement(id, data, mutationId) {
     return executeMovement(item);
 }
 
-// ========================================
-// CRUD: DELETE
-// ========================================
-
 function deleteMovement(id, baseVersion, mutationId) {
     validateMutationId(mutationId);
 
@@ -567,10 +503,6 @@ function deleteMovement(id, baseVersion, mutationId) {
 
     return executeMovement(item);
 }
-
-// ========================================
-// EXPORT
-// ========================================
 
 module.exports = {
     pushChanges,

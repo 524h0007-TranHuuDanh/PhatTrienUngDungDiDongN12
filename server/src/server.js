@@ -1,7 +1,6 @@
 const app = require("./app");
 const config = require("./config/env");
 
-// Khởi tạo database và chạy migration
 require("./database/connection");
 
 app.listen(config.port, config.host, () => {

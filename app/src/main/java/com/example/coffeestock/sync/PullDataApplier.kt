@@ -49,12 +49,10 @@ class PullDataApplier(
                     remote.id
                 )
 
-                // Không ghi đè dữ liệu local đang chờ đồng bộ.
                 if (local != null && local.pendingOp != "NONE") {
                     continue
                 }
 
-                // Xử lý bản ghi đã bị xóa trên server.
                 if (remote.isDeleted) {
 
                     if (local != null) {
@@ -68,7 +66,6 @@ class PullDataApplier(
                     continue
                 }
 
-                // Bản ghi chưa tồn tại ở thiết bị.
                 if (local == null) {
 
                     movementDao.insertMovement(
@@ -77,7 +74,6 @@ class PullDataApplier(
 
                 } else {
 
-                    // Bản ghi đã tồn tại và không có thay đổi chờ gửi.
                     movementDao.updateFromServer(
                         id = remote.id,
                         productId = remote.productId,
@@ -96,7 +92,6 @@ class PullDataApplier(
                 }
             }
 
-            // Lưu cursor cùng transaction với dữ liệu.
             syncDao.saveSyncMeta(
                 SyncMetaEntity(
                     key = CURSOR_KEY,

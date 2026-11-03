@@ -83,7 +83,6 @@ interface MovementDao {
         productId: String
     ): List<MovementEntity>
 
-    // Khôi phục các phiếu bị kẹt ở trạng thái SYNCING.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'PENDING'
@@ -92,7 +91,6 @@ interface MovementDao {
     """)
     suspend fun resetStuckSyncing(): Int
 
-    // Chỉ retry FAILED khi người dùng chủ động yêu cầu.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'PENDING'
@@ -101,7 +99,6 @@ interface MovementDao {
     """)
     suspend fun requeueFailed(): Int
 
-    // Đưa một phiếu về PENDING khi gặp lỗi tạm thời.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'PENDING'
@@ -115,7 +112,6 @@ interface MovementDao {
         expectedMutationId: String
     ): Int
 
-    // Chỉ lấy PENDING để gửi. FAILED không tự động được gửi lại.
     @Query("""
         SELECT * FROM stock_movement
         WHERE pendingOp != 'NONE'
@@ -124,7 +120,6 @@ interface MovementDao {
     """)
     suspend fun getOutboxBatch(): List<MovementEntity>
 
-    // Đánh dấu phiếu đang được gửi lên server.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'SYNCING'
@@ -139,7 +134,6 @@ interface MovementDao {
         expectedMutationId: String
     ): Int
 
-    // Đánh dấu đã đồng bộ nếu dữ liệu local chưa thay đổi.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'SYNCED',
@@ -156,8 +150,6 @@ interface MovementDao {
         newServerVersion: Long
     ): Int
 
-    // Server đã nhận CREATE nhưng local đã được sửa trong lúc request đang chạy.
-    // Nhận serverVersion và đổi CREATE thành UPDATE để lượt PUSH tiếp theo không tạo trùng.
     @Query("""
         UPDATE stock_movement
         SET serverVersion = :newServerVersion,
@@ -176,7 +168,6 @@ interface MovementDao {
         newServerVersion: Long
     ): Int
 
-    // Đánh dấu gửi thất bại.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'FAILED'
@@ -190,7 +181,6 @@ interface MovementDao {
         expectedMutationId: String
     ): Int
 
-    // Đánh dấu xung đột.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'CONFLICT'
@@ -204,7 +194,6 @@ interface MovementDao {
         expectedMutationId: String
     ): Int
 
-    // Đưa phiếu về PENDING khi gặp lỗi tạm thời.
     @Query("""
         UPDATE stock_movement
         SET syncState = 'PENDING'
@@ -218,7 +207,6 @@ interface MovementDao {
         expectedMutationId: String
     ): Int
 
-    // Cập nhật dữ liệu từ server nếu local không có thay đổi đang chờ.
     @Query("""
         UPDATE stock_movement
         SET productId = :productId,
@@ -255,7 +243,6 @@ interface MovementDao {
         updatedAt: String
     ): Int
 
-    // Xóa phiếu local khi nhận tombstone mới hơn từ server.
     @Query("""
         DELETE FROM stock_movement
         WHERE id = :id
@@ -267,7 +254,6 @@ interface MovementDao {
         serverVersion: Long
     ): Int
 
-    // Cập nhật version trước khi gửi lại sau khi xử lý HTTP 409.
     @Query("""
         UPDATE stock_movement
         SET serverVersion = :newServerVersion,
@@ -284,7 +270,6 @@ interface MovementDao {
         newServerVersion: Long
     ): Int
 
-    // Chọn phiên bản server làm phiên bản thắng khi giải quyết xung đột.
     @Query("""
         UPDATE stock_movement
         SET productId = :productId,

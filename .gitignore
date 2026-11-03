@@ -1,15 +1,37 @@
+# Android / Gradle
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
+.gradle/
+/build/
+/app/build/
 /captures
 .externalNativeBuild
 .cxx
+.kotlin/
+
+# Android Studio
+.idea/
+*.iml
+
+# Local machine config
 local.properties
+
+# Node.js / Server
+server/node_modules/
+node_modules/
+
+# Environment secrets
+server/.env
+server/.env.*
+!server/.env.example
+
+# Database files
+server/data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db

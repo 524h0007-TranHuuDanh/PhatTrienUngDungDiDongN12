@@ -5,11 +5,6 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-// ============================================================
-// 1. CẤU HÌNH DATABASE KIỂM THỬ
-// Phải thiết lập biến môi trường trước khi import app/database.
-// ============================================================
-
 const tempDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), "coffeestock-integration-")
 );
@@ -26,13 +21,8 @@ process.env.DATABASE_PATH = databasePath;
 process.env.HOST = "127.0.0.1";
 process.env.PORT = "0";
 
-// Import sau khi đã cấu hình DATABASE_PATH và API_KEY.
 const app = require("../src/app");
 const db = require("../src/database/connection");
-
-// ============================================================
-// 2. HÀM HỖ TRỢ
-// ============================================================
 
 let server;
 let baseUrl;
@@ -146,20 +136,11 @@ async function pushItems(items) {
     });
 }
 
-// ============================================================
-// 3. KIỂM THỬ TÍCH HỢP
-// ============================================================
-
 test(
     "CoffeeStock Sync API integration",
     async t => {
         try {
             await startTestServer();
-
-            // ------------------------------------------------
-            // TEST 1: HEALTH CHECK
-            // ------------------------------------------------
-
             await t.test("Health check trả HTTP 200", async () => {
                 const response = await fetch(`${baseUrl}/health`);
 
@@ -170,10 +151,6 @@ test(
                 assert.equal(body.status, "ok");
                 assert.equal(body.service, "CoffeeStock API");
             });
-
-            // ------------------------------------------------
-            // TEST 2: API KEY
-            // ------------------------------------------------
 
             await t.test("Thiếu API key phải trả HTTP 401", async () => {
                 const response = await apiRequest(
@@ -188,10 +165,6 @@ test(
                     "INVALID_API_KEY"
                 );
             });
-
-            // ------------------------------------------------
-            // TEST 3: TẠO PHIẾU MỚI
-            // ------------------------------------------------
 
             let createdMovement;
 
@@ -221,10 +194,6 @@ test(
                 createdMovement = result.movement;
             });
 
-            // ------------------------------------------------
-            // TEST 4: IDEMPOTENCY
-            // ------------------------------------------------
-
             await t.test(
                 "Gửi lại mutation_id không tạo bản ghi mới",
                 async () => {
@@ -249,10 +218,6 @@ test(
                     );
                 }
             );
-
-            // ------------------------------------------------
-            // TEST 5: CẬP NHẬT ĐÚNG VERSION
-            // ------------------------------------------------
 
             let updatedMovement;
 
@@ -284,10 +249,6 @@ test(
                     updatedMovement = result.movement;
                 }
             );
-
-            // ------------------------------------------------
-            // TEST 6: PHÁT HIỆN XUNG ĐỘT
-            // ------------------------------------------------
 
             await t.test(
                 "base_version cũ phải trả HTTP 409",
@@ -327,10 +288,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 7: PULL DỮ LIỆU
-            // ------------------------------------------------
-
             let cursorAfterUpdate = 0;
 
             await t.test(
@@ -362,10 +319,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 8: KIỂM TRA CURSOR KHÔNG CÓ DỮ LIỆU MỚI
-            // ------------------------------------------------
-
             await t.test(
                 "Pull với cursor mới nhất trả danh sách rỗng",
                 async () => {
@@ -382,10 +335,6 @@ test(
                     assert.equal(response.body.has_more, false);
                 }
             );
-
-            // ------------------------------------------------
-            // TEST 9: XÓA MỀM
-            // ------------------------------------------------
 
             let deleteCursor = 0;
 
@@ -413,10 +362,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 10: PULL TOMBSTONE
-            // ------------------------------------------------
-
             await t.test(
                 "Pull nhận được tombstone sau khi xóa",
                 async () => {
@@ -440,10 +385,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 11: VALIDATION SỐ LƯỢNG
-            // ------------------------------------------------
-
             await t.test(
                 "Số lượng bằng 0 phải trả HTTP 422",
                 async () => {
@@ -464,10 +405,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 12: VALIDATION PULL PARAMETERS
-            // ------------------------------------------------
-
             await t.test(
                 "Pull từ cursor âm phải trả HTTP 400",
                 async () => {
@@ -483,10 +420,6 @@ test(
                     );
                 }
             );
-
-            // ------------------------------------------------
-            // TEST 13: GIỚI HẠN LIMIT PULL
-            // ------------------------------------------------
 
             await t.test(
                 "Pull với limit lớn hơn 500 phải trả HTTP 400",
@@ -504,10 +437,6 @@ test(
                 }
             );
 
-            // ------------------------------------------------
-            // TEST 14: PUSH RỖNG
-            // ------------------------------------------------
-
             await t.test(
                 "Push danh sách rỗng phải trả HTTP 422",
                 async () => {
@@ -521,10 +450,6 @@ test(
                     );
                 }
             );
-
-            // ------------------------------------------------
-            // TEST 15: GET MOVEMENTS
-            // ------------------------------------------------
 
             await t.test(
                 "Danh sách movements không hiển thị phiếu đã xóa",
