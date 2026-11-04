@@ -71,6 +71,9 @@ class SyncMetricsTest {
 
             assertEquals(SyncResult.SUCCESS, result)
             assertEquals(n, api.getRecordCount())
+            val savedMovements = db.movementDao().getAllMovements().first()
+            assertEquals(n, savedMovements.size)
+            assertTrue(savedMovements.all { it.syncState == "SYNCED" })
 
             sb.appendLine("$n\t$elapsedMs\t\t${"%.2f".format(elapsedMs.toDouble() / n)}")
             db.close()
@@ -101,6 +104,19 @@ class SyncMetricsTest {
             api.failPushMode = if (i % 10 < 3) FailMode.IO_ERROR else FailMode.NONE
 
             val result = engine(db, api).synchronize()
+            val expectedResult =
+                if (i % 10 < 3) SyncResult.RETRY else SyncResult.SUCCESS
+            assertEquals("Unexpected result for iteration $i", expectedResult, result)
+
+            val saved = db.movementDao().getMovementById("m-$i")!!
+            if (expectedResult == SyncResult.RETRY) {
+                assertEquals("PENDING", saved.syncState)
+                assertEquals(0, api.getRecordCount())
+            } else {
+                assertEquals("SYNCED", saved.syncState)
+                assertEquals(1, api.getRecordCount())
+            }
+
             if (result == SyncResult.SUCCESS) success++ else retry++
             sb.appendLine("$i\t$result\t${api.getRecordCount()}")
             db.close()
@@ -111,7 +127,8 @@ class SyncMetricsTest {
         sb.appendLine()
 
         println(sb.toString())
-        assertTrue(success > 0)
+        assertEquals(14, success)
+        assertEquals(6, retry)
     }
 
     @Test fun metric3_duplicateRate_idempotency() = runBlocking {
@@ -122,7 +139,7 @@ class SyncMetricsTest {
             pendingMovement("m1", "fixed-mutation", 5.0)
         )
 
-        engine(db, api).synchronize()
+        assertEquals(SyncResult.SUCCESS, engine(db, api).synchronize())
         assertEquals(1, api.getRecordCount())
 
         val current = db.movementDao().getMovementById("m1")!!
@@ -134,7 +151,9 @@ class SyncMetricsTest {
             )
         )
 
-        repeat(5) { engine(db, api).synchronize() }
+        repeat(5) {
+            assertEquals(SyncResult.SUCCESS, engine(db, api).synchronize())
+        }
 
         val serverCount = api.getRecordCount()
         val localCount = db.movementDao().getAllMovements().first().size

@@ -1,196 +1,104 @@
-# D6. Bộ kiểm thử và kết quả kiểm thử
+# D6. Kiểm thử và kết quả
 
-Tài liệu tổng hợp test cases cho đồng bộ online/offline, phục hồi mạng, lỗi API, retry, đồng bộ lặp và xung đột dữ liệu. Kết quả bên dưới là từ lần chạy kiểm thử ngày **04/11/2026** trong môi trường phát triển hiện tại.
-
-## 1. Môi trường và lệnh chạy
+## 1. Môi trường kiểm thử
 
 | Thành phần | Môi trường |
 |---|---|
-| Android JVM tests | Gradle Wrapper, variant `debug` |
-| Android instrumentation tests | Emulator `Medium_Phone(AVD) - 17` |
-| Server integration tests | Node.js `v24.20.0`, npm scripts, database tạm do test tạo |
-| Repository | Nhánh làm việc hiện tại; test server sử dụng API key giả lập và database tạm |
+| Android unit test | Gradle Wrapper, variant `debug` |
+| Android instrumentation test | Android Emulator `Medium_Phone(AVD) - 17`, API 37 |
+| Server integration test | Node.js `v24.20.0`, HTTP loopback, SQLite database tạm |
+| Ngày chạy | 04/11/2026 |
 
-Các lệnh đã chạy thành công:
+## 2. Tổng kết
 
-**Windows PowerShell, từ thư mục gốc dự án:**
+| Nhóm kiểm thử | Tổng số | PASS | FAIL | SKIP |
+|---|---:|---:|---:|---:|
+| Android unit test | 8 | 8 | 0 | 0 |
+| Android instrumentation test | 59 | 59 | 0 | 0 |
+| Server integration test | 16 | 16 | 0 | 0 |
+| **Tổng cộng** | **83** | **83** | **0** | **0** |
 
-```powershell
-.\gradlew.bat :app:testDebugUnitTest
-.\gradlew.bat :app:connectedDebugAndroidTest
-```
+**Kết quả: PASS.** Tất cả 83 test hoàn tất thành công, không có test lỗi hoặc bị bỏ qua.
 
-**Windows PowerShell, trong thư mục `server/`:**
+## 3. Test cases và kết quả
 
-```powershell
-npm.cmd ci
-npm.cmd test
-```
+### 3.1. Android unit test — 8/8 PASS
 
-`npm.cmd ci` cài đúng dependencies theo `server/package-lock.json`. `npm test` chạy `node --test tests/*.test.js`.
+| Test suite | Số lượng | Nội dung kiểm thử | Kết quả |
+|---|---:|---|---|
+| `ExampleUnitTest` | 1 | Kiểm tra unit test cơ bản | 1 PASS |
+| `ConflictResolverTest` | 6 | Quy tắc xử lý xung đột và chọn dữ liệu cần giữ | 6 PASS |
+| `SyncSchedulerTest` | 1 | Lên lịch sync duy nhất và chính sách thay thế công việc | 1 PASS |
+| **Tổng** | **8** | | **8 PASS, 0 FAIL** |
 
-## 2. Tổng kết kết quả thực tế
+### 3.2. Android instrumentation test — 59/59 PASS
 
-| Bộ kiểm thử | Kết quả | Pass | Fail | Skip | Báo cáo |
-|---|---:|---:|---:|---:|---|
-| Android JVM unit tests | **PASS** | 8 | 0 | 0 | `app/build/test-results/testDebugUnitTest/TEST-*.xml` |
-| Android instrumentation tests | **PASS** | 59 | 0 | 0 | `app/build/reports/androidTests/connected/debug/index.html` |
-| Server integration tests | **PASS** | 16 | 0 | 0 | [`server-integration-tests.log`](./evidence/D6/server-integration-tests.log) |
-| **Tổng cộng** | **PASS** | **83** | **0** | **0** | Các báo cáo ở trên |
+| Test suite | Số lượng | Nội dung kiểm thử | Kết quả |
+|---|---:|---|---|
+| `ExampleInstrumentedTest` | 1 | Khởi tạo ngữ cảnh ứng dụng | 1 PASS |
+| `MovementRepositoryTest` | 15 | Tạo, sửa, xác nhận, xóa phiếu và kiểm tra dữ liệu hợp lệ | 15 PASS |
+| `MultiDeviceConflictEdgeTest` | 4 | Trùng ID, xóa-vs-sửa và xóa đồng thời | 4 PASS |
+| `MultiDeviceConflictTest` | 1 | Hai database mô phỏng thiết bị xử lý xung đột phiên bản | 1 PASS |
+| `PullDataApplierTest` | 6 | Pull insert/update, cursor, dữ liệu local pending và tombstone | 6 PASS |
+| `PushHttpErrorTest` | 8 | Push/pull gặp HTTP 408, 429, 500, 503 và retry | 8 PASS |
+| `SyncConsistencyTest` | 4 | Nhất quán dữ liệu, pull tăng dần và xóa mềm | 4 PASS |
+| `SyncEngineTest` | 6 | Push/pull, lỗi mạng và phục hồi trạng thái `SYNCING` | 6 PASS |
+| `SyncMetricsTest` | 3 | Thời gian sync, tỷ lệ lỗi mô phỏng và idempotency | 3 PASS |
+| `SyncScenarioTest` | 7 | Offline, khôi phục, persistence, retry, xóa và đồng bộ lô | 7 PASS |
+| `SyncWorkerTest` | 3 | API key, retry và giới hạn số lần thử của worker | 3 PASS |
+| `MovementItemTest` | 1 | Hiển thị dữ liệu và trạng thái đồng bộ | 1 PASS |
+| **Tổng** | **59** | | **59 PASS, 0 FAIL, 0 SKIP** |
 
-Android report được lấy từ XML kết quả Gradle sau khi chạy test. Server test kết thúc với `ℹ tests 16`, `ℹ pass 16`, `ℹ fail 0`. Server có in log lỗi validation trong các ca cố ý gửi dữ liệu sai (ví dụ số lượng 0 và push rỗng); các response HTTP mong đợi đã được assert và test vẫn **PASS**.
-
-Các XML kết quả của lần chạy này đã được lưu trong [docs/evidence/D6/](./evidence/D6/):
-
-- `TEST-com.example.coffeestock.ExampleUnitTest.xml`
-- `TEST-com.example.coffeestock.sync.ConflictResolverTest.xml`
-- `TEST-com.example.coffeestock.sync.SyncSchedulerTest.xml`
-- `TEST-Medium_Phone(AVD) - 17.xml`
-- `server-integration-tests.log`
-
-Android report HTML chi tiết cũng được tạo tại `app/build/reports/androidTests/connected/debug/index.html`; đây là đường dẫn trong thư mục build và có thể bị xóa khi clean/build lại. XML đã sao chép là minh chứng kết quả Android có thể lưu cùng hồ sơ.
-
-## 3. Test cases đã chạy
-
-### 3.1. Android unit tests — 8/8 PASS
-
-| Test suite | Số test | Kết quả |
-|---|---:|---|
-| `ExampleUnitTest` | 1 | PASS |
-| `ConflictResolverTest` | 6 | PASS |
-| `SyncSchedulerTest` | 1 | PASS |
-
-`ConflictResolverTest` xác nhận các quy tắc giữ dữ liệu server, retry sửa local và retry xóa local. `SyncSchedulerTest` xác nhận yêu cầu lặp dùng cùng unique work name `coffeestock_sync` và policy `APPEND_OR_REPLACE`.
-
-### 3.2. Android instrumentation — 59/59 PASS
-
-| Test suite | Số test | Phạm vi |
-|---|---:|---|
-| `ExampleInstrumentedTest` | 1 | Khởi tạo ngữ cảnh ứng dụng |
-| `MovementRepositoryTest` | 15 | Validation, tạo/sửa/xác nhận/xóa phiếu; xóa mềm và xóa cứng |
-| `MultiDeviceConflictEdgeTest` | 4 | Trùng ID, xóa-vs-sửa và xóa đồng thời |
-| `MultiDeviceConflictTest` | 1 | Hai thiết bị sửa cùng phiếu, phát hiện version cũ và giải quyết conflict |
-| `PullDataApplierTest` | 6 | Insert/update, không ghi đè pending local, cursor và tombstone |
-| `PushHttpErrorTest` | 8 | HTTP 408/429/500/503, retry và phục hồi sau HTTP 500 |
-| `SyncConsistencyTest` | 4 | Nhất quán Room/server, pull tăng dần, cập nhật và tombstone |
-| `SyncEngineTest` | 6 | Push/pull, lỗi mạng, phục hồi worker kẹt `SYNCING` và reset về `PENDING` |
-| `SyncMetricsTest` | 3 | Chỉ số thời gian, success rate và duplicate rate |
-| `SyncScenarioTest` | 7 | Offline local, phục hồi mạng, timeout, persistence, mutation ID, delete và nhiều bản ghi |
-| `SyncWorkerTest` | 3 | Thiếu API key, retry trước giới hạn và failure ở lần thử tối đa |
-| `MovementItemTest` | 1 | Hiển thị dữ liệu và trạng thái đồng bộ |
-| **Tổng** | **59** | **59 PASS, 0 FAIL, 0 SKIP** |
-
-Các ca đặc biệt cho yêu cầu D6:
-
-| Mã | Test case | Kết quả |
-|---|---|---|
-| TC02 | Tạo/sửa khi offline, dữ liệu vẫn nằm trong Room/outbox | PASS |
-| TC03 | Lỗi mạng ở lần đầu, bật lại mạng giả lập và sync lần hai thành công | PASS |
-| TC05 | Timeout server, giữ nguyên dữ liệu local và trả retry | PASS |
-| TC06 | Retry giữ cùng `mutationId`, không tạo bản ghi trùng | PASS |
-| TC08 | Xóa offline tạo tombstone, không bị pull làm sống lại | PASS |
-| HTTP retry | Push/pull với HTTP 408, 429, 500, 503 | PASS |
-| Worker recovery | Movement bị bỏ ở `SYNCING` được đưa về `PENDING` và gửi lại | PASS |
-| TC07, TC10–TC13 | Xung đột nhiều thiết bị: stale update, trùng ID, delete-vs-edit, delete đồng thời | PASS |
-| Server idempotency | Gửi lại cùng `mutation_id` không tăng version/sequence hay tạo bản ghi mới | PASS |
-
-**Giới hạn cần nêu rõ:** các test Android online/offline và lỗi mạng dùng `FakeApiService`/database test để mô phỏng phản hồi mạng; chúng không bật/tắt Wi-Fi hoặc kiểm thử server triển khai thật. Integration test server chạy HTTP thật trên loopback trong tiến trình test và dùng SQLite database tạm. Vì vậy, kết quả hiện có xác nhận logic ứng dụng/API trong môi trường test, không phải phép đo chất lượng mạng thực tế.
-
-### 3.3. Server integration tests — 16/16 PASS
+### 3.3. Server integration test — 16/16 PASS
 
 | Test case | Kết quả |
 |---|---|
-| Health check trả HTTP 200 | PASS |
-| Thiếu API key trả HTTP 401 | PASS |
-| Tạo phiếu mới | PASS |
-| Gửi lại `mutation_id` không tạo bản ghi mới | PASS |
-| Cập nhật với `base_version` đúng | PASS |
-| `base_version` cũ trả HTTP 409 | PASS |
-| Pull trả dữ liệu mới nhất | PASS |
-| Pull với cursor mới nhất trả danh sách rỗng | PASS |
-| Xóa phiếu bằng version hiện tại | PASS |
-| Pull nhận tombstone | PASS |
-| Số lượng bằng 0 trả HTTP 422 | PASS |
-| Cursor âm trả HTTP 400 | PASS |
-| Limit pull lớn hơn 500 trả HTTP 400 | PASS |
+| Health check trả HTTP 200; thiếu API key trả HTTP 401 | PASS |
+| Tạo phiếu mới; gửi lại `mutation_id` không tạo bản ghi trùng | PASS |
+| Cập nhật với `base_version` hiện tại thành công; version cũ trả HTTP 409 | PASS |
+| Pull dữ liệu mới nhất; cursor hiện tại trả danh sách rỗng | PASS |
+| Xóa phiếu và nhận tombstone qua pull | PASS |
+| Số lượng không hợp lệ trả HTTP 422 | PASS |
+| Cursor âm và limit vượt giới hạn trả HTTP 400 | PASS |
 | Push danh sách rỗng trả HTTP 422 | PASS |
-| Danh sách không hiển thị phiếu đã xóa | PASS |
-| Tổng kết suite `CoffeeStock Sync API integration` | **PASS — 16/16, 0 lỗi** |
+| Danh sách movements không hiển thị phiếu đã xóa | PASS |
+| **Tổng** | **16 PASS, 0 FAIL, 0 SKIP** |
 
-## 4. Phân tích kết quả
+## 4. Kịch bản đồng bộ được kiểm thử tự động
 
-1. **Kết quả tự động nhất quán:** cả ba bộ kiểm thử đều hoàn tất với 0 lỗi: Android unit 8/8, Android instrumentation 59/59 và server integration 16/16. Tổng cộng 83/83 test pass trong lần chạy được ghi nhận.
-2. **Các rủi ro đồng bộ chính đã có test:** dữ liệu local khi offline, phục hồi sau lỗi mạng/HTTP, giữ `mutationId` khi retry, tombstone, pull cursor, worker bị dừng khi đang `SYNCING`, và xung đột giữa hai thiết bị. Các test có assertion trạng thái dữ liệu, version/cursor hoặc số bản ghi, không chỉ dựa vào log.
-3. **Server/API được kiểm tra độc lập:** integration tests thực hiện request HTTP tới Express và xác nhận các status code, response body, idempotency, version conflict và xóa mềm. Chúng dùng SQLite tạm nên không sửa database phát triển.
-4. **Không có test fail/skip trong lần chạy này:** không cần phân tích lỗi test hiện có. Server vẫn in stack trace cho một số request dữ liệu sai vì middleware log lỗi; các mã HTTP 422 đó là kết quả mong đợi và test tương ứng pass.
-5. **Giới hạn của phạm vi xác minh:** Android network failure/offline dùng fake API và Room test database; chúng không chứng minh trạng thái Wi-Fi thực tế, chất lượng mạng hoặc thời gian phục hồi trên hạ tầng triển khai. Kịch bản thủ công M1–M6 chưa chạy, nên hiện chưa có ảnh chụp UI hoặc log từ hai thiết bị thật. Kết quả cũng chỉ phản ánh cấu hình debug/emulator và môi trường ngày chạy, không thay thế kiểm thử tải hay kiểm thử production.
+| Kịch bản | Test tiêu biểu | Kết quả |
+|---|---|---|
+| Tạo/sửa offline; dữ liệu được lưu trong Room và tồn tại sau khi mở lại database | `tc02_offlineCreateAndEdit_persistsInRoom`, `tc04_persistenceAcrossReopen` | PASS |
+| Lỗi mạng trả `RETRY`; lần đồng bộ sau thành công | `tc03_networkRecovery_secondSyncSucceeds` | PASS |
+| Retry giữ nguyên `mutationId`, không tạo bản ghi trùng | `tc06_retryPreservesMutationId`, `metric3_duplicateRate_idempotency` | PASS |
+| Timeout giữ dữ liệu local và trạng thái chờ đồng bộ | `tc05_serverTimeout_preservesLocalChanges` | PASS |
+| Xóa phiếu tạo tombstone, không làm dữ liệu bị hồi sinh | `tc08_offlineDelete_notResurrected` | PASS |
+| Xung đột giữa hai database mô phỏng thiết bị được xử lý theo version | `tc07_twoDevices_conflictAndResolution`, `tc10`–`tc13` | PASS |
+| Movement bị gián đoạn ở trạng thái `SYNCING` được phục hồi và gửi lại | `synchronize_recoversMovementLeftSyncingByInterruptedWorker` | PASS |
+| Push/pull gặp lỗi HTTP tạm thời được yêu cầu retry | `PushHttpErrorTest` | PASS |
 
-## 5. Kết luận
+Các kịch bản offline và nhiều thiết bị dùng Room test database cùng `FakeApiService`; chúng kiểm tra logic đồng bộ tự động, không mô phỏng Wi-Fi hoặc hai thiết bị vật lý. Video demo thao tác UI được thực hiện riêng và không thuộc kết quả test của báo cáo này.
 
-Trong phạm vi kiểm thử tự động đã chạy, các luồng cốt lõi của ứng dụng và server — lưu thay đổi offline, push/pull, retry/phục hồi, tránh áp dụng mutation lặp, xóa mềm và xử lý xung đột — đều đạt yêu cầu của test suite: **83 PASS, 0 FAIL, 0 SKIP**. Kết quả phù hợp để làm minh chứng kiểm thử logic và API cho D6.
+## 5. Minh chứng kết quả
 
-Trước khi nộp kết luận về hoạt động thực tế online/offline, cần chạy các kịch bản M1–M6 trên emulator/thiết bị với server đang chạy, cập nhật PASS/FAIL và bổ sung ảnh/log tương ứng. Không nên diễn giải các test fake network hiện có thành bằng chứng đã kiểm chứng mạng thật.
+Các báo cáo XML và log của lần chạy được lưu trong thư mục [docs/evidence/D6](./evidence/D6/):
 
-## 6. Test cases kiểm thử thủ công trên thiết bị thật
+- Android instrumentation: [TEST-Medium_Phone(AVD) - 17.xml](./evidence/D6/TEST-Medium_Phone(AVD)%20-%2017.xml)
+- Android unit — `ExampleUnitTest`: [TEST-com.example.coffeestock.ExampleUnitTest.xml](./evidence/D6/TEST-com.example.coffeestock.ExampleUnitTest.xml)
+- Android unit — `ConflictResolverTest`: [TEST-com.example.coffeestock.sync.ConflictResolverTest.xml](./evidence/D6/TEST-com.example.coffeestock.sync.ConflictResolverTest.xml)
+- Android unit — `SyncSchedulerTest`: [TEST-com.example.coffeestock.sync.SyncSchedulerTest.xml](./evidence/D6/TEST-com.example.coffeestock.sync.SyncSchedulerTest.xml)
+- Server integration test: [server-integration-tests.log](./evidence/D6/server-integration-tests.log)
 
-Các kịch bản sau cần dùng server và app đang chạy trên emulator/điện thoại, thay vì fake service. Chưa thực hiện trong lượt kiểm thử này; điền trạng thái, thời gian và ảnh/log sau khi chạy.
+## 6. Lệnh chạy kiểm thử
 
-| Mã | Kịch bản | Kết quả | Minh chứng |
-|---|---|---|---|
-| M1 | Tạo phiếu khi online, kiểm tra phiếu xuất hiện trên server và thiết bị thứ hai | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-| M2 | Ngắt mạng, tạo và sửa phiếu; khởi động lại app, kiểm tra dữ liệu local còn | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-| M3 | Bật mạng lại, chạy đồng bộ; xác nhận phiếu offline lên server đúng một lần | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-| M4 | Mô phỏng hai thiết bị sửa cùng phiếu rồi đồng bộ lần lượt; kiểm tra conflict/version | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-| M5 | Xóa phiếu đã đồng bộ khi offline; bật mạng lại và xác nhận tombstone tới thiết bị còn lại | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-| M6 | Dừng/kết thúc app khi một phiếu đang `SYNCING`, mở lại và xác nhận phiếu được phục hồi/đồng bộ | [Chưa chạy — điền PASS/FAIL] | [Chèn ảnh/log] |
-
-(**Hướng dẫn chạy M1–M6 — xóa phần hướng dẫn trong ngoặc khi hoàn tất báo cáo:** khởi động server theo [README.md](../README.md), bảo đảm `server/.env` và `local.properties` dùng cùng API key; chạy app trên emulator hoặc hai thiết bị. Dùng Android Settings/Quick Settings để bật/tắt Wi-Fi hoặc chế độ máy bay. Với emulator, kiểm tra `adb reverse tcp:8080 tcp:8080`; sau mỗi kịch bản ghi lại thao tác, trạng thái app/server và kết quả mong đợi/thực tế. Không dùng lệnh xóa app hoặc xóa database trong lúc kiểm tra tính persistence.)
-
-## 7. Hướng dẫn lưu log và ảnh minh chứng
-
-(**Xóa các hướng dẫn trong ngoặc sau khi tạo đủ minh chứng nộp bài.**)
-
-1. Chạy lại bộ cần lấy bằng các lệnh ở mục 1; lưu nguyên phần terminal output, gồm tên lệnh, ngày giờ, thiết bị và dòng tổng kết pass/fail.
-2. Với Android instrumentation, mở `app/build/reports/androidTests/connected/debug/index.html`; chụp trang tổng quan có số test/fail và trang chi tiết các suite sync. Các XML nằm trong `app/build/outputs/androidTest-results/connected/debug/`.
-3. Với unit test, lưu các XML trong `app/build/test-results/testDebugUnitTest/`.
-4. Với backend, chạy `npm.cmd test` trong `server/`; log của lần chạy đã lưu tại `docs/evidence/D6/server-integration-tests.log`. Sau lần chạy mới, cập nhật lại log minh chứng để khớp kết quả mới nhất.
-5. Với M1–M6, chụp màn hình trạng thái ứng dụng và thiết bị; che API key, địa chỉ nội bộ hoặc dữ liệu cá nhân nếu có.
-6. Đặt file minh chứng vào `docs/evidence/D6/` và điền đường dẫn vào cột **Minh chứng** của mục 4. Không ghi API key thật vào tài liệu/log đã nộp.
-
-## 8. Cách chạy riêng từng nhóm
-
-**Android unit tests:**
+Chạy Android unit và instrumentation test từ thư mục gốc dự án:
 
 ```powershell
-.\gradlew.bat :app:testDebugUnitTest
+.\gradlew.bat :app:testDebugUnitTest :app:connectedDebugAndroidTest
 ```
 
-**Android instrumentation — emulator phải đang chạy:**
-
-```powershell
-.\gradlew.bat :app:connectedDebugAndroidTest
-```
-
-**Chỉ chạy test kịch bản đồng bộ:**
-
-```powershell
-.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.example.coffeestock.sync.SyncScenarioTest"
-```
-
-**Server integration tests, chạy trong `server/`:**
+Chạy server integration test từ thư mục `server/`:
 
 ```powershell
 npm.cmd test
 ```
-
-**Server test trên Linux/macOS, chạy trong `server/`:**
-
-```bash
-npm test
-```
-
-## 9. Tài liệu và mã nguồn liên quan
-
-- Mô tả đồng bộ và chính sách xung đột: [D5. Mô-đun đồng bộ và xử lý xung đột](./D5_SYNC_CONFLICTS.md)
-- API, schema, seed và triển khai server: [D4. Mã nguồn máy chủ và API](./D4_SERVER_API.md)
-- Hướng dẫn build/chạy dự án: [README.md](../README.md)

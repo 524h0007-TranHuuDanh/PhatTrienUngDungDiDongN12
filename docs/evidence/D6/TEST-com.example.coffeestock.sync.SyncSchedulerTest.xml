@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.coffeestock.sync.SyncSchedulerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-04T04:17:09.930Z" hostname="DESKTOP-PURSP81" time="0.06">
+<testsuite name="com.example.coffeestock.sync.SyncSchedulerTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-04T06:49:17.691Z" hostname="DESKTOP-PURSP81" time="0.081">
   <properties/>
-  <testcase name="enqueueSync_UsesSameUniqueWorkChainForRepeatedRequests" classname="com.example.coffeestock.sync.SyncSchedulerTest" time="0.06"/>
+  <testcase name="enqueueSync_UsesSameUniqueWorkChainForRepeatedRequests" classname="com.example.coffeestock.sync.SyncSchedulerTest" time="0.081"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

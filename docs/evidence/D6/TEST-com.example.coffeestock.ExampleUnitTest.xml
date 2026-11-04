@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.coffeestock.ExampleUnitTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-04T04:17:09.882Z" hostname="DESKTOP-PURSP81" time="0.013">
+<testsuite name="com.example.coffeestock.ExampleUnitTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-04T06:49:17.634Z" hostname="DESKTOP-PURSP81" time="0.017">
   <properties/>
-  <testcase name="addition_isCorrect" classname="com.example.coffeestock.ExampleUnitTest" time="0.004"/>
+  <testcase name="addition_isCorrect" classname="com.example.coffeestock.ExampleUnitTest" time="0.005"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

@@ -33,21 +33,21 @@ Ba test đo đều **PASS** (3 pass, 0 fail, 0 skip). XML và logcat đầy đ�
 
 | Số bản ghi (N) | Thời gian (ms) | Thời gian/bản ghi (ms) | Kết quả |
 |---:|---:|---:|---|
-| 1 | 52 | 52.00 | Thành công, đủ 1 bản ghi phía API giả lập |
-| 5 | 105 | 21.00 | Thành công, đủ 5 bản ghi |
-| 10 | 188 | 18.80 | Thành công, đủ 10 bản ghi |
-| 25 | 446 | 17.84 | Thành công, đủ 25 bản ghi |
-| 50 | 903 | 18.06 | Thành công, đủ 50 bản ghi |
+| 1 | 82 | 82.00 | Thành công, đủ 1 bản ghi phía API giả lập |
+| 5 | 149 | 29.80 | Thành công, đủ 5 bản ghi |
+| 10 | 247 | 24.70 | Thành công, đủ 10 bản ghi |
+| 25 | 603 | 24.12 | Thành công, đủ 25 bản ghi |
+| 50 | 1263 | 25.26 | Thành công, đủ 50 bản ghi |
 
 ```mermaid
 xychart-beta
     title "Thời gian synchronize theo số bản ghi (FakeApiService)"
     x-axis "Số bản ghi" [1, 5, 10, 25, 50]
-    y-axis "Thời gian (ms)" 0 --> 1000
-    bar [52, 105, 188, 446, 903]
+    y-axis "Thời gian (ms)" 0 --> 1400
+    bar [82, 149, 247, 603, 1263]
 ```
 
-Số đo cho thấy tổng thời gian tăng theo kích thước dữ liệu trong cấu hình thử nghiệm. Mức thời gian/bản ghi giảm từ N=1 đến các lô lớn hơn và gần 18 ms/bản ghi ở N=25–50. Đây chỉ là thời gian xử lý trong emulator với API giả lập, **không phải** thời gian round-trip qua mạng hoặc hiệu năng server.
+Số đo cho thấy tổng thời gian tăng theo kích thước dữ liệu trong cấu hình thử nghiệm. Thời gian/bản ghi ở các lô N=5–50 nằm trong khoảng 24–30 ms; phép đo N=1 là 82 ms/bản ghi. Đây chỉ là một lần đo xử lý trong emulator với API giả lập, **không phải** thời gian round-trip qua mạng hoặc hiệu năng server.
 
 ### 3.2. Tỷ lệ thành công khi giả lập lỗi mạng
 
@@ -76,7 +76,7 @@ Với phép đo idempotency, tỷ lệ trùng được tính là `(tổng record
 
 | Chỉ tiêu | Kết quả hiện có | Diễn giải |
 |---|---|---|
-| Thời gian đồng bộ cục bộ | 52–903 ms với N=1–50 | Đo `SyncEngine` + Room in-memory + FakeApiService; không phải thời gian mạng thật |
+| Thời gian đồng bộ cục bộ | 82–1263 ms với N=1–50 | Đo `SyncEngine` + Room in-memory + FakeApiService; không phải thời gian mạng thật |
 | Thành công lượt đầu dưới lỗi giả lập | 14/20 = 70% | 6 lượt được yêu cầu `RETRY`; chưa đo kết quả sau khi chạy lại |
 | Tỷ lệ test tự động pass trong lần chạy D6 | 83/83 = 100% | Đây là tỷ lệ pass của test suite, không phải tỷ lệ thành công đồng bộ production |
 | Mutation trùng trong phép thử idempotency | 0/1 = 0% | Năm lần gọi đồng bộ lại không tạo thêm record trong API giả lập |
@@ -85,39 +85,27 @@ Với phép đo idempotency, tỷ lệ trùng được tính là `(tổng record
 
 Kết quả hỗ trợ nhận định rằng các luồng cốt lõi đã có kiểm thử tự động: ứng dụng giữ thay đổi local, xử lý lỗi tạm thời bằng retry, giữ cùng mutation ID khi retry và không tạo bản ghi trùng trong kịch bản idempotency. Tính nhất quán được xác minh bằng assertion dữ liệu ở Room và API giả lập, cộng với integration tests server.
 
-## 5. Hạn chế và phép đo cần bổ sung
+## 5. Phạm vi tự động hóa và giới hạn
 
-- Thời gian ở mục 3.1 là một lần đo cho mỗi N, trên emulator và fake API; chưa có nhiều lần lặp để tính trung bình/độ lệch chuẩn.
-- Fake API loại bỏ độ trễ, jitter, mất gói, DNS, TLS và tải thực của server; không dùng các số này để dự đoán trải nghiệm người dùng trên Internet.
-- Tỷ lệ 70% chỉ đo kết quả lượt đầu theo mẫu lỗi cưỡng bức; chưa đo retry đến khi phục hồi hoặc hết giới hạn lần thử.
-- Chưa có phép đo throughput/end-to-end trên backend triển khai, thiết bị vật lý hoặc hai thiết bị đồng bộ đồng thời.
-- Server integration tests dùng HTTP loopback và SQLite tạm; chúng không đánh giá tải cao, độ bền dữ liệu production hoặc nhiều client đồng thời dưới tải.
-- Kết quả nhất quán có phạm vi theo test case hiện có, không chứng minh mọi thứ tự thao tác hoặc mọi tình huống cạnh tranh đều đúng.
+Các phép đo D7 và assertion về dữ liệu chạy tự động; không cần nhập thời gian, số lượt hoặc PASS/FAIL bằng tay. Chạy lại phép đo trên emulator bằng:
 
-(**Hướng dẫn chạy phép đo thực tế — xóa toàn bộ phần hướng dẫn trong ngoặc này sau khi đã điền bảng và lưu minh chứng:**
+```powershell
+.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.example.coffeestock.sync.SyncMetricsTest"
+```
 
-1. **Khởi động và cấu hình:** chạy server theo hướng dẫn trong [D4](./D4_SERVER_API.md); cấu hình `local.properties` dùng cùng API key. Với emulator, kiểm tra `adb reverse tcp:8080 tcp:8080`; với điện thoại thật, dùng địa chỉ LAN của máy server và bảo đảm firewall cho phép kết nối. Nếu thử đồng bộ hai thiết bị, cài app trên cả hai và trỏ cùng một server/database.
-2. **Đo thời gian end-to-end:** chuẩn bị số phiếu cần đo (N=1, 10, 50, 100) ở trạng thái chờ đồng bộ. Với từng N, thực hiện 3 lượt độc lập: bấm **Đồng bộ ngay**, bấm giờ từ lúc bắt đầu đến khi UI báo đồng bộ thành công và server xác nhận đủ N phiếu; ghi thời gian từng lượt, N, thiết bị, mạng, kết quả và lỗi. Tính trung bình ba thời gian bằng `(lượt 1 + lượt 2 + lượt 3) / 3`. Mỗi lượt cần bộ ID phiếu riêng hoặc dọn dữ liệu thử an toàn trước lượt sau để không đếm nhầm dữ liệu cũ.
-3. **Đo thành công/phục hồi offline:** tắt Wi-Fi/mạng, tạo một phiếu mới, xác nhận phiếu còn trong app và ở trạng thái chờ; bật mạng lại, ghi thời gian từ lúc mạng hoạt động đến lúc phiếu báo đã đồng bộ. Chạy 10 lượt độc lập; ghi số lượt đồng bộ thành công, số lượt retry/thất bại và thời gian phục hồi. Không xóa dữ liệu ứng dụng khi đang kiểm tra persistence.
-4. **Kiểm tra nhất quán hai thiết bị:** tạo/đồng bộ phiếu trên thiết bị A, xác nhận phiếu xuất hiện trên B; thử cập nhật hoặc xóa theo kịch bản, đồng bộ cả hai và đối chiếu ID, version, trạng thái xóa/conflict. Ghi rõ dữ liệu mong đợi, dữ liệu thực tế và mọi bản ghi thiếu/trùng.
-5. **Lưu minh chứng:** chụp UI trước/sau đồng bộ và lưu log thời gian/kết quả trong `docs/evidence/D7/`. Che API key, địa chỉ riêng tư và dữ liệu cá nhân. Điền các bảng ngay dưới đây; không ghi một số trung bình nếu chưa lưu các lần đo thành phần.
+Test thất bại nếu đồng bộ không thành công, số bản ghi/status không đúng, tỷ lệ mô phỏng không đúng 14 SUCCESS/6 RETRY, hoặc gửi lại mutation làm phát sinh bản ghi trùng. XML lần chạy được tạo tại `app/build/outputs/androidTest-results/connected/debug/` và bản minh chứng lần chạy hiện tại nằm trong [evidence D7](./evidence/D7/).
 
-**Những phần bạn cần tự chạy:** đo end-to-end với backend thật (không dùng FakeApiService), kiểm tra phục hồi sau ngắt/kết nối mạng thật, và đối chiếu dữ liệu giữa hai thiết bị. Các số đo giả lập ở mục 3 vẫn giữ nguyên để làm kết quả test tự động, không thay thế các phép đo này.**)
+Các giới hạn cần giữ nguyên khi diễn giải kết quả:
 
-| Số phiếu (N) | Lượt 1 (ms) | Lượt 2 (ms) | Lượt 3 (ms) | Trung bình (ms) | Thành công | Thiết bị/mạng | Minh chứng |
-|---:|---:|---:|---:|---:|---:|---|---|
-| 1 | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Điền] | [Ảnh/log] |
-| 10 | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Điền] | [Ảnh/log] |
-| 50 | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Điền] | [Ảnh/log] |
-| 100 | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Điền] | [Ảnh/log] |
-
-| Kịch bản phục hồi offline | Số lượt | Đồng bộ thành công | Retry/thất bại | Thời gian phục hồi trung bình | Kết quả nhất quán hai thiết bị | Minh chứng |
-|---|---:|---:|---:|---:|---|---|
-| Tạo phiếu offline, bật mạng lại | 10 | [Chưa đo] | [Chưa đo] | [Chưa đo] | [Chưa kiểm tra] | [Ảnh/log] |
+- Thời gian ở mục 3.1 là một lần đo cho mỗi N trên emulator; không có lặp để tính trung bình/độ lệch chuẩn.
+- `FakeApiService` loại bỏ độ trễ/jitter/mất gói/DNS/TLS và tải server thật; các số đo không dự đoán hiệu năng Internet.
+- Tỷ lệ 70% là kết quả lượt đầu theo mẫu lỗi cố định; sáu lượt `RETRY` không được thử lại trong metric này.
+- Kịch bản nhiều thiết bị dùng hai Room database độc lập với fake server, không phải hai thiết bị vật lý.
+- Chưa có phép đo end-to-end với backend production, mạng thật, throughput hoặc nhiều client dưới tải. Các kiểm thử UI/video nếu cần là minh chứng trình diễn riêng, không phải bước cần thiết để test logic D7 pass.
 
 ## 6. Kết luận
 
-Trong môi trường kiểm thử hiện tại, `SyncEngine` xử lý được lô tổng hợp đến 50 movement với 903 ms trên emulator + FakeApiService; khi 30% request bị ép lỗi, 14/20 lượt hoàn tất thành công ngay và 6/20 yêu cầu retry. Thử gửi lại cùng mutation ID năm lần cho kết quả 1 record, 0 record trùng. Các kiểm tra consistency liên quan đều pass trong các test suite đã chạy.
+Trong môi trường kiểm thử hiện tại, `SyncEngine` xử lý được lô tổng hợp đến 50 movement với 1263 ms trên emulator + FakeApiService; khi 30% request bị ép lỗi, 14/20 lượt hoàn tất thành công ngay và 6/20 yêu cầu retry. Thử gửi lại cùng mutation ID năm lần cho kết quả 1 record, 0 record trùng. Các kiểm tra consistency liên quan đều pass trong các test suite đã chạy.
 
 Các kết quả này là minh chứng cho logic đồng bộ trong môi trường kiểm thử, **chưa phải đánh giá hiệu năng hoặc độ tin cậy trên hạ tầng triển khai thật**. Cần bổ sung phép đo end-to-end, lặp nhiều lần, kiểm thử phục hồi mạng thật và ghi nhận hai thiết bị hội tụ trước khi đưa ra kết luận định lượng về môi trường sử dụng thực tế.
 
