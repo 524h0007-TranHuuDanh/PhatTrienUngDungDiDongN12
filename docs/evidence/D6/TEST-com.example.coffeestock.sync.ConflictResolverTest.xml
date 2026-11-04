@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.coffeestock.sync.ConflictResolverTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-11-04T04:17:09.906Z" hostname="DESKTOP-PURSP81" time="0.018">
+  <properties/>
+  <testcase name="serverDeleted_shouldKeepServer" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.017"/>
+  <testcase name="localDeleted_shouldRetryLocalDelete" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.0"/>
+  <testcase name="bothDraft_shouldRetryLocal" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.001"/>
+  <testcase name="localConfirmed_shouldRetryLocal" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.0"/>
+  <testcase name="serverConfirmedAndLocalDeleted_shouldKeepServer" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.0"/>
+  <testcase name="serverConfirmed_shouldKeepServer" classname="com.example.coffeestock.sync.ConflictResolverTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

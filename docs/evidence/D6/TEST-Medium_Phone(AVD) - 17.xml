@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="59" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:17:13" hostname="localhost">
+  <testsuite name="com.example.coffeestock.ExampleInstrumentedTest" tests="1" failures="0" errors="0" skipped="0" time="0.002" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="useAppContext" classname="com.example.coffeestock.ExampleInstrumentedTest" time="0.002" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.data.MovementRepositoryTest" tests="15" failures="0" errors="0" skipped="0" time="3.178" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="deleteDraft_synced_softDeletesWithTombstone" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.155" />
+    <testcase name="createDraft_unknownProduct_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.068" />
+    <testcase name="createDraft_negativeQuantity_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.043" />
+    <testcase name="createDraft_invalidType_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.040" />
+    <testcase name="deleteDraft_unsynced_hardDeletes" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.069" />
+    <testcase name="confirmMovement_outWithSufficientStock_returnsNoWarning" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.087" />
+    <testcase name="confirmMovement_outWithInsufficientStock_returnsWarningButConfirms" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.116" />
+    <testcase name="updateDraft_onlyForDraft" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.067" />
+    <testcase name="updateDraft_bumpsLocalRevAndMutationId" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.078" />
+    <testcase name="createDraft_zeroQuantity_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.056" />
+    <testcase name="createDraft_inWithoutBatchCode_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.056" />
+    <testcase name="deleteDraft_confirmed_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.103" />
+    <testcase name="confirmMovement_alreadyConfirmed_throws" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.124" />
+    <testcase name="createDraft_outWithoutBatchCode_succeeds" classname="com.example.coffeestock.data.MovementRepositoryTest" time="0.056" />
+    <testcase name="confirmMovement_inDraft_returnsNoWarning" classname="com.example.coffeestock.data.MovementRepositoryTest" time="2.060" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.MultiDeviceConflictEdgeTest" tests="4" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="tc13_bothDeleteConcurrently_convergeToDeleted" classname="com.example.coffeestock.sync.MultiDeviceConflictEdgeTest" time="0.000" />
+    <testcase name="tc10_twoDevicesCreateSameId_BMarkedFailed" classname="com.example.coffeestock.sync.MultiDeviceConflictEdgeTest" time="0.000" />
+    <testcase name="tc12_editVsDelete_localDeleteRetriesAndWins" classname="com.example.coffeestock.sync.MultiDeviceConflictEdgeTest" time="0.000" />
+    <testcase name="tc11_deleteVsEdit_serverDeleteWins" classname="com.example.coffeestock.sync.MultiDeviceConflictEdgeTest" time="0.000" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.MultiDeviceConflictTest" tests="1" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="tc07_twoDevices_conflictAndResolution" classname="com.example.coffeestock.sync.MultiDeviceConflictTest" time="0.000" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.PullDataApplierTest" tests="6" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="applyPage_shouldDeleteLocalMovementWhenServerSendsTombstone" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+    <testcase name="applyPage_shouldInsertNewServerMovementAndSaveCursor" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+    <testcase name="applyPage_shouldNotOverwritePendingLocalMovement" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+    <testcase name="applyPage_shouldNotReplaceWithOlderServerVersion" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+    <testcase name="applyPage_shouldUpdateExistingSyncedMovement" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+    <testcase name="applyPage_shouldAdvanceCursorAndPreservePendingMovement" classname="com.example.coffeestock.sync.PullDataApplierTest" time="0.000" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.PushHttpErrorTest" tests="8" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="pullHttp500_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pushHttp503_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pullHttp408_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pushHttp429_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pushHttp500_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pushHttp408_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pushHttp500RecoversOnRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+    <testcase name="pullHttp429_returnsRetry" classname="com.example.coffeestock.sync.PushHttpErrorTest" time="0.000" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.SyncConsistencyTest" tests="4" failures="0" errors="0" skipped="0" time="0.248" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="afterServerTombstone_localDeleted" classname="com.example.coffeestock.sync.SyncConsistencyTest" time="0.000" />
+    <testcase name="afterServerUpdate_roomUpdated" classname="com.example.coffeestock.sync.SyncConsistencyTest" time="0.000" />
+    <testcase name="incrementalPull_onlyFetchesNewRecords" classname="com.example.coffeestock.sync.SyncConsistencyTest" time="0.000" />
+    <testcase name="afterFullSync_roomAndServerMatchOnAllRecords" classname="com.example.coffeestock.sync.SyncConsistencyTest" time="0.248" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.SyncEngineTest" tests="6" failures="0" errors="0" skipped="0" time="0.340" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="pullHttpErrorReturnsRetry" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.031" />
+    <testcase name="resetStuckSyncing_requeuesOnlyMovementsWithPendingOperations" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.028" />
+    <testcase name="pushNetworkFailureReturnsRetryAndRestoresPendingState" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.044" />
+    <testcase name="pullInsertsRemoteMovementAndAdvancesCursor" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.040" />
+    <testcase name="synchronize_recoversMovementLeftSyncingByInterruptedWorker" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.124" />
+    <testcase name="synchronize_pushesPendingMovementAndPullsSuccessfully" classname="com.example.coffeestock.sync.SyncEngineTest" time="0.073" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.SyncMetricsTest" tests="3" failures="0" errors="0" skipped="0" time="4.424" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="metric3_duplicateRate_idempotency" classname="com.example.coffeestock.sync.SyncMetricsTest" time="0.638" />
+    <testcase name="metric2_successRate_30PercentFailure" classname="com.example.coffeestock.sync.SyncMetricsTest" time="1.503" />
+    <testcase name="metric1_syncTimeByDataSize" classname="com.example.coffeestock.sync.SyncMetricsTest" time="2.283" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.SyncScenarioTest" tests="7" failures="0" errors="0" skipped="0" time="1.786" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="tc08_offlineDelete_notResurrected" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.211" />
+    <testcase name="tc06_retryPreservesMutationId" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.306" />
+    <testcase name="tc05_serverTimeout_preservesLocalChanges" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.179" />
+    <testcase name="tc03_networkRecovery_secondSyncSucceeds" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.400" />
+    <testcase name="tc04_persistenceAcrossReopen" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.227" />
+    <testcase name="tc09_multiRecordSync_allSyncedAndMeasured" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.430" />
+    <testcase name="tc02_offlineCreateAndEdit_persistsInRoom" classname="com.example.coffeestock.sync.SyncScenarioTest" time="0.033" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.sync.SyncWorkerTest" tests="3" failures="0" errors="0" skipped="0" time="0.019" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="testSyncWorker_NoApiKey_ReturnsFailure" classname="com.example.coffeestock.sync.SyncWorkerTest" time="0.006" />
+    <testcase name="testSyncWorker_RetryResultAtMaxAttempts_ReturnsFailure" classname="com.example.coffeestock.sync.SyncWorkerTest" time="0.007" />
+    <testcase name="testSyncWorker_RetryResultBeforeMaxAttempts_ReturnsRetry" classname="com.example.coffeestock.sync.SyncWorkerTest" time="0.006" />
+  </testsuite>
+  <testsuite name="com.example.coffeestock.ui.MovementItemTest" tests="1" failures="0" errors="0" skipped="0" time="7.683" timestamp="2026-11-04T04:17:13" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="testMovementItemDisplaysCorrectDataAndSyncStatus" classname="com.example.coffeestock.ui.MovementItemTest" time="7.683" />
+  </testsuite>
+</testsuites>

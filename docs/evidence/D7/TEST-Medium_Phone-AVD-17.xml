@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuites tests="3" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-04T04:29:05" hostname="localhost">
+  <testsuite name="com.example.coffeestock.sync.SyncMetricsTest" tests="3" failures="0" errors="0" skipped="0" time="3.851" timestamp="2026-11-04T04:29:05" hostname="localhost">
+    <properties>
+      <property name="device" value="emulator-5554" />
+    </properties>
+    <testcase name="metric3_duplicateRate_idempotency" classname="com.example.coffeestock.sync.SyncMetricsTest" time="0.600" />
+    <testcase name="metric2_successRate_30PercentFailure" classname="com.example.coffeestock.sync.SyncMetricsTest" time="1.435" />
+    <testcase name="metric1_syncTimeByDataSize" classname="com.example.coffeestock.sync.SyncMetricsTest" time="1.816" />
+  </testsuite>
+</testsuites>

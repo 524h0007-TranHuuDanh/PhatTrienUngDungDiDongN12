@@ -161,6 +161,40 @@ class SyncEngineTest {
         }
 
     @Test
+    fun resetStuckSyncing_requeuesOnlyMovementsWithPendingOperations() =
+        runBlocking {
+
+            val stuckMovement = movement().copy(
+                syncState = "SYNCING"
+            )
+            val alreadySyncedMovement = movement().copy(
+                id = "movement-2",
+                mutationId = "mutation-2",
+                syncState = "SYNCING",
+                pendingOp = "NONE"
+            )
+            database.movementDao().insertMovements(
+                listOf(stuckMovement, alreadySyncedMovement)
+            )
+
+            val updatedCount = database.movementDao().resetStuckSyncing()
+
+            assertEquals(1, updatedCount)
+            assertEquals(
+                "PENDING",
+                database.movementDao()
+                    .getMovementById(stuckMovement.id)
+                    ?.syncState
+            )
+            assertEquals(
+                "SYNCING",
+                database.movementDao()
+                    .getMovementById(alreadySyncedMovement.id)
+                    ?.syncState
+            )
+        }
+
+    @Test
     fun pushNetworkFailureReturnsRetryAndRestoresPendingState() =
         runBlocking {
 

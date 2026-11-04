@@ -102,6 +102,12 @@ npm test
 
 Lệnh này chạy các integration test trong `tests/sync.integration.test.js`.
 
+Tài liệu chi tiết về API, schema, dữ liệu mẫu và triển khai server: [D4. Mã nguồn máy chủ và API](docs/D4_SERVER_API.md).
+Tài liệu mô-đun đồng bộ và xử lý xung đột: [D5. Mô-đun đồng bộ và xử lý xung đột](docs/D5_SYNC_CONFLICTS.md).
+Kết quả và hướng dẫn kiểm thử: [D6. Bộ kiểm thử và kết quả kiểm thử](docs/D6_TEST_RESULTS.md).
+Mã nguồn, kiến trúc và cách build/chạy ứng dụng Android: [D3. Mã nguồn ứng dụng Android](docs/D3_ANDROID_APP.md).
+Báo cáo thực nghiệm và đánh giá: [D7. Báo cáo thực nghiệm và đánh giá](docs/D7_EXPERIMENT_REPORT.md).
+
 ---
 
 ## 4. Hướng dẫn build & chạy Android
