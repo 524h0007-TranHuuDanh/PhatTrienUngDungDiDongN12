@@ -31,41 +31,67 @@
 
 | Công cụ | Phiên bản |
 |---|---|
-| JDK | 17+ |
+| JDK | 17+ (Android Studio có thể dùng JBR đi kèm) |
 | Android Studio | Ladybug 2024.2+ |
-| Android SDK | compileSdk 37, minSdk 24 |
+| Android SDK/thiết bị | Android SDK Platform 37, Platform-Tools; Android 7.0 (API 24) trở lên |
 | Node.js | 20+ |
 | npm | 10+ |
 
+Gradle Wrapper (`gradlew`/`gradlew.bat`) sẽ tự tải phiên bản Gradle cần thiết trong lần chạy đầu tiên. Trong Android Studio, mở **SDK Manager** và cài Android SDK Platform 37 nếu máy chưa có.
 
 ## 3. Hướng dẫn chạy Server
 
+Mở terminal tại thư mục dự án, sau đó chạy:
+
+**Windows (PowerShell):**
+```powershell
+cd server
+Copy-Item .env.example .env
+npm install
+```
+
+**Linux/macOS:**
 ```bash
 cd server
-npm install
 cp .env.example .env
-# Sửa .env nếu cần (mặc định API_KEY=coffeestock-dev-key)
+npm install
+```
 
-# (tùy chọn) Tạo dữ liệu mẫu — 5 movements
+Mở `server/.env` và đặt `API_KEY` thành `coffeestock-dev-key` để khớp với cấu hình Android mẫu trong `local.properties.example`. Đây là khóa dùng cho môi trường phát triển; không dùng khóa này khi triển khai thật. Các giá trị khác có thể giữ mặc định (`PORT=8080`, `HOST=0.0.0.0`, `DATABASE_PATH=./data/coffeestock.db`).
+
+Tùy chọn, tạo dữ liệu mẫu (5 movements):
+```bash
 node src/scripts/seed.js
+```
 
-# Chạy server
+Khởi động server và để terminal này tiếp tục chạy:
+```bash
 npm start
+```
+
+Hoặc dùng chế độ tự khởi động lại khi sửa mã:
+```bash
+npm run dev
 ```
 
 Server chạy tại `http://localhost:8080`.
 
+> Chạy các lệnh `npm` trong thư mục `server`. File `server/.env` và cơ sở dữ liệu được loại khỏi Git.
+
 ### 3.1. Kiểm tra nhanh
 
+Mở terminal khác để kiểm tra server:
+
 ```bash
-# Health check (không cần API key)
-curl http://localhost:8080/health
+# Windows PowerShell: dùng curl.exe để tránh alias Invoke-WebRequest
+curl.exe http://localhost:8080/health
 # → {"status":"ok","service":"CoffeeStock API","version":"1.0.0"}
 
 # Lấy danh sách movements (cần API key)
-curl -H "X-API-Key: coffeestock-dev-key" \
-     http://localhost:8080/api/v1/movements
+curl.exe -H "X-API-Key: coffeestock-dev-key" http://localhost:8080/api/v1/movements
 ```
+
+Linux/macOS có thể dùng `curl` thay cho `curl.exe`.
 
 ### 3.2. Test server
 
@@ -73,97 +99,127 @@ curl -H "X-API-Key: coffeestock-dev-key" \
 cd server
 npm test
 ```
-Chạy 15 integration test trong `tests/sync.integration.test.js`.
+
+Lệnh này chạy các integration test trong `tests/sync.integration.test.js`.
 
 ---
 
 ## 4. Hướng dẫn build & chạy Android
 
-### 4.1. Cấu hình lần đầu (bắt buộc)
+### 4.1. Cấu hình lần đầu
 
-Copy file template:
+Tại thư mục gốc dự án, tạo `local.properties` từ file mẫu:
+
+**Windows (PowerShell):**
+```powershell
+Copy-Item local.properties.example local.properties
+```
+
+**Linux/macOS:**
 ```bash
 cp local.properties.example local.properties
 ```
-Mở `local.properties`, sửa 2 dòng (giữ nguyên các comment):
+
+Mở `local.properties` và kiểm tra cấu hình:
 ```properties
 COFFEESTOCK_API_BASE_URL=http://127.0.0.1:8080/
 COFFEESTOCK_API_KEY=coffeestock-dev-key
 ```
 
-> `local.properties` đã nằm trong `.gitignore` → **không commit**, không bị ghi đè khi pull code. Mỗi dev tự set trên máy mình.
+Android Studio thường tự ghi `sdk.dir` vào file này khi mở dự án. Nếu build bằng command line mà Gradle không tìm thấy Android SDK, thêm đường dẫn SDK của máy, ví dụ:
+```properties
+# Windows; thay <YourName> bằng tên người dùng Windows
+sdk.dir=C\:\\Users\\<YourName>\\AppData\\Local\\Android\\Sdk
+```
+Hoặc đặt biến môi trường `ANDROID_HOME` trỏ đến Android SDK.
 
-### 4.2. Build
+> `local.properties` nằm trong `.gitignore`: không commit file này. Mỗi máy tự cấu hình URL server, API key và Android SDK.
 
+### 4.2. Build APK
+
+Chạy lệnh từ thư mục gốc dự án:
+
+**Windows:**
+```powershell
+.\gradlew.bat :app:assembleDebug
+```
+
+**Linux/macOS:**
 ```bash
-# Debug APK
 ./gradlew :app:assembleDebug
+```
 
-# Cài lên emulator/thiết bị (tự chạy adb reverse)
+APK debug được tạo tại `app/build/outputs/apk/debug/app-debug.apk`.
+
+### 4.3. Cài đặt và chạy
+
+Đảm bảo server đang chạy theo mục 3 và emulator hoặc thiết bị Android đã kết nối. Kiểm tra thiết bị được nhận diện:
+```bash
+adb devices
+```
+
+Cài ứng dụng:
+
+**Windows:**
+```powershell
+.\gradlew.bat :app:installDebug
+```
+
+**Linux/macOS:**
+```bash
 ./gradlew :app:installDebug
 ```
-APK đầu ra: `app/build/outputs/apk/debug/app-debug.apk`
 
-### 4.3. Chạy
+Task `installDebug` tự thử chạy `adb reverse` cho cổng 8080. Có thể mở app từ Android Studio (**Run `MainActivity`**) hoặc chạy:
+```bash
+adb shell am start -n com.example.coffeestock/.MainActivity
+```
 
-Mở Android Studio → chọn `app` → Run `MainActivity`, hoặc:
+Nếu cần cài APK đã build thủ công:
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 adb shell am start -n com.example.coffeestock/.MainActivity
 ```
 
----
+### 4.4. Kết nối emulator ↔ server Node.js
 
-## 4.4. Kết nối emulator ↔ server Node.js  
+Với cấu hình emulator mặc định, app dùng `127.0.0.1:8080` và `adb reverse` để nối cổng emulator đến máy chạy server:
 
-### Vấn đề: firewall máy host chặn port 8080
-| Đường đi | Firewall áp dụng? | Kết quả |
-|---|---|---|
-| App → `10.0.2.2:8080` |  Có — qua virtual NIC của emulator |  BỊ CHẶN |
-| App → `127.0.0.1:8080` (qua `adb reverse`) | Không — qua kênh ADB loopback | OK |
-
-**→ Bắt buộc dùng `127.0.0.1` + `adb reverse`.**
-
-### Chạy `adb reverse` — **đã tự động hoá**
-`adb reverse` **bị reset mỗi khi emulator restart**. Đã có 3 cách xử lý:
-
-**Cách 1 — Tự động qua Gradle (khuyến nghị)**
-Task `adbReverse` tự chạy trước `installDebug` và `connectedDebugAndroidTest`:
 ```bash
-./gradlew :app:installDebug           # → adbReverse tự chạy
-./gradlew :app:connectedDebugAndroidTest
+adb reverse tcp:8080 tcp:8080
+adb reverse --list
 ```
-Chạy tay khi cần:
+
+Gradle tự gọi `adb reverse` trước `installDebug` và `connectedDebugAndroidTest`. Nếu emulator vừa khởi động lại hoặc app không kết nối được, kiểm tra lại kết nối bằng các lệnh trên. Có thể chạy task riêng:
 ```bash
+# Windows
+.\gradlew.bat :app:adbReverse
+
+# Linux/macOS
 ./gradlew :app:adbReverse
 ```
 
-**Cách 2 — Script 1 click (khi không rebuild)**
+Hoặc dùng script trong repository:
 ```bash
-./scripts/adb-reverse.sh           # Linux/Mac
-scripts\adb-reverse.bat            # Windows
+# Linux/macOS
+./scripts/adb-reverse.sh
 ```
-
-**Cách 3 — Kiểm tra thủ công**
-```bash
-adb reverse --list
-# Kỳ vọng: <serial> tcp:8080 tcp:8080
-```
-Nếu chưa có:
-```bash
-adb reverse tcp:8080 tcp:8080
+```powershell
+# Windows
+.\scripts\adb-reverse.bat
 ```
 
 ### Thiết bị thật (không phải emulator)
-Sửa `local.properties`:
+
+Sửa `COFFEESTOCK_API_BASE_URL` trong `local.properties` thành địa chỉ LAN của máy chạy server, ví dụ:
 ```properties
 COFFEESTOCK_API_BASE_URL=http://192.168.1.10:8080/
 ```
-Trong đó `192.168.1.10` là **IP LAN của máy tính chạy server**. Đảm bảo điện thoại và máy tính **cùng mạng WiFi**.
 
-Mở firewall port 8080 cho phép inbound (Windows):
+Thay `192.168.1.10` bằng IP LAN thực tế của máy tính. Đảm bảo điện thoại và máy tính cùng mạng Wi-Fi, và firewall cho phép kết nối đến cổng 8080. Server mặc định bind `0.0.0.0`; có thể kiểm tra `HOST` trong `server/.env`.
+
+Trên Windows, nếu firewall chặn kết nối, mở PowerShell với quyền Administrator:
 ```powershell
-# PowerShell (Run as Administrator)
 New-NetFirewallRule -DisplayName "CoffeeStock 8080" `
     -Direction Inbound -Protocol TCP -LocalPort 8080 `
     -Action Allow -Profile Private
@@ -174,15 +230,37 @@ New-NetFirewallRule -DisplayName "CoffeeStock 8080" `
 ## 5. Chạy test
 
 ### 5.1. Unit test (JVM — nhanh, không cần emulator)
+**Windows:**
+```powershell
+.\gradlew.bat :app:testDebugUnitTest
+```
+
+**Linux/macOS:**
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
 Kỳ vọng: 7 test PASS (6 `ConflictResolverTest` + 1 `ExampleUnitTest`).
 
 ### 5.2. Instrumented test (cần emulator)
-```bash
-# Khởi động emulator trước (Android Studio → Device Manager)
+Khởi động emulator trước (Android Studio → Device Manager). Các lệnh dưới đây chạy từ thư mục gốc dự án.
 
+**Windows (PowerShell):**
+```powershell
+# Chạy tất cả
+.\gradlew.bat :app:connectedDebugAndroidTest
+
+# Chỉ TC02–TC09
+.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.example.coffeestock.sync.SyncScenarioTest"
+
+# Chỉ metrics D7
+.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.example.coffeestock.sync.SyncMetricsTest"
+
+# Chỉ TC07 multi-device
+.\gradlew.bat :app:connectedDebugAndroidTest "-Pandroid.testInstrumentationRunnerArguments.class=com.example.coffeestock.sync.MultiDeviceConflictTest"
+```
+
+**Linux/macOS:**
+```bash
 # Chạy tất cả
 ./gradlew :app:connectedDebugAndroidTest
 
@@ -210,11 +288,10 @@ npm test
 
 | Lỗi | Nguyên nhân | Cách sửa |
 |---|---|---|
-| `Connection refused` khi sync | Chưa `adb reverse` hoặc server chưa chạy | `./gradlew :app:adbReverse` + `npm start` |
-| `Connected refused` trên **thiết bị thật** | Server chỉ bind `127.0.0.1` | Sửa `server/.env`: `HOST=0.0.0.0`, mở firewall |
+| `Connection refused` khi sync trên emulator | Server chưa chạy hoặc `adb reverse` chưa hoạt động | Chạy `npm start` trong `server`, sau đó `adb reverse tcp:8080 tcp:8080` |
+| `Connection refused` trên **thiết bị thật** | Sai IP, thiết bị không cùng mạng hoặc firewall chặn kết nối | Kiểm tra IP LAN, Wi-Fi, `HOST=0.0.0.0` trong `server/.env` và firewall |
 | `INVALID_API_KEY` | API key không khớp | So `local.properties` với `server/.env` |
-| Build lỗi `Unresolved reference: page` | Bug `SyncEngine.pullChanges` (do-while scope) | Cập nhật `SyncEngine.kt` bản đã fix |
+| `SDK location not found` | Android SDK chưa được cấu hình | Mở dự án bằng Android Studio hoặc đặt `sdk.dir`/`ANDROID_HOME` như mục 4.1 |
 | Test fail do DB cũ | Migration 1→2 | Xóa app: `adb shell pm clear com.example.coffeestock` |
 
 ---
-
