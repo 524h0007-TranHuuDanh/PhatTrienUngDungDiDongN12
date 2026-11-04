@@ -18,6 +18,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -101,6 +102,62 @@ class SyncEngineTest {
             assertEquals("SYNCED", saved?.syncState)
             assertEquals("NONE", saved?.pendingOp)
             assertEquals(2L, saved?.serverVersion)
+        }
+
+    @Test
+    fun synchronize_recoversMovementLeftSyncingByInterruptedWorker() =
+        runBlocking {
+
+            val interruptedMovement = movement().copy(
+                syncState = "SYNCING"
+            )
+            database.movementDao().insertMovement(interruptedMovement)
+
+            var pushCalled = false
+            val api = FakeApiService(
+                push = { request ->
+                    pushCalled = true
+                    assertEquals(
+                        interruptedMovement.id,
+                        request.items.single().id
+                    )
+
+                    Response.success(
+                        PushResponseDto(
+                            results = listOf(
+                                PushResultDto(
+                                    id = interruptedMovement.id,
+                                    mutationId = interruptedMovement.mutationId,
+                                    ok = true,
+                                    movement = remoteMovement(serverVersion = 2),
+                                    error = null
+                                )
+                            )
+                        )
+                    )
+                },
+                pull = { _, _ ->
+                    Response.success(
+                        PullResponseDto(
+                            items = emptyList(),
+                            nextCursor = 0L,
+                            hasMore = false
+                        )
+                    )
+                }
+            )
+
+            val result = engine(api).synchronize()
+
+            assertEquals(SyncResult.SUCCESS, result)
+            assertTrue("Interrupted movement should be pushed again", pushCalled)
+
+            val recovered =
+                database.movementDao().getMovementById(interruptedMovement.id)
+            assertNotNull(recovered)
+            assertEquals("SYNCED", recovered?.syncState)
+            assertEquals("NONE", recovered?.pendingOp)
+            assertEquals(2L, recovered?.serverVersion)
         }
 
     @Test

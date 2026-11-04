@@ -7,7 +7,7 @@ import androidx.work.WorkerParameters
 import com.example.coffeestock.BuildConfig
 import kotlinx.coroutines.CancellationException
 
-class SyncWorker(
+open class SyncWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
@@ -17,12 +17,17 @@ class SyncWorker(
         private const val MAX_ATTEMPTS = 5
     }
 
+    protected open fun apiKey(): String = BuildConfig.API_KEY
+
+    protected open suspend fun synchronize(): SyncResult =
+        SyncEngineFactory.create(applicationContext).synchronize()
+
     override suspend fun doWork(): Result {
 
         val startedAt = System.currentTimeMillis()
         val attempt = runAttemptCount + 1
 
-        if (BuildConfig.API_KEY.isBlank()) {
+        if (apiKey().isBlank()) {
 
             Log.e(
                 TAG,
@@ -39,11 +44,7 @@ class SyncWorker(
 
         return try {
 
-            val syncEngine = SyncEngineFactory.create(
-                applicationContext
-            )
-
-            val syncResult = syncEngine.synchronize()
+            val syncResult = synchronize()
 
             val elapsedMs =
                 System.currentTimeMillis() - startedAt

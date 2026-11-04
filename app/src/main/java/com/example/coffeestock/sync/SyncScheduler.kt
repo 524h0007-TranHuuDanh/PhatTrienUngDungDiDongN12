@@ -5,6 +5,7 @@ import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
@@ -14,7 +15,15 @@ object SyncScheduler {
     private const val SYNC_WORK_NAME = "coffeestock_sync"
 
     fun enqueueSync(context: Context) {
+        val workManager = WorkManager.getInstance(context.applicationContext)
+        enqueueSync { name, policy, request ->
+            workManager.enqueueUniqueWork(name, policy, request)
+        }
+    }
 
+    internal fun enqueueSync(
+        enqueueUniqueWork: (String, ExistingWorkPolicy, OneTimeWorkRequest) -> Unit
+    ) {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
@@ -28,11 +37,10 @@ object SyncScheduler {
             )
             .build()
 
-        WorkManager.getInstance(context.applicationContext)
-            .enqueueUniqueWork(
-                SYNC_WORK_NAME,
-                ExistingWorkPolicy.APPEND_OR_REPLACE,
-                syncRequest
-            )
+        enqueueUniqueWork(
+            SYNC_WORK_NAME,
+            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            syncRequest
+        )
     }
 }
