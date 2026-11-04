@@ -21,7 +21,7 @@ import com.example.coffeestock.data.local.entity.SyncMetaEntity
         ConflictEntity::class,
         SyncMetaEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -39,6 +39,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_stock_movement_syncState " +
+                        "ON stock_movement (syncState)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_stock_movement_pendingOp " +
+                        "ON stock_movement (pendingOp)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_stock_movement_productId " +
+                        "ON stock_movement (productId)"
+                )
+            }
+        }
+
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -50,6 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "coffeestock_database"
                 )
                     .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_2_3)
                     .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
                     .build()
 

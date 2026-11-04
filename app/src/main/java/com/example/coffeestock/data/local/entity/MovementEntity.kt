@@ -1,9 +1,17 @@
 package com.example.coffeestock.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "stock_movement")
+@Entity(
+    tableName = "stock_movement",
+    indices = [
+        Index(value = ["syncState"]),
+        Index(value = ["pendingOp"]),
+        Index(value = ["productId"])
+    ]
+)
 data class MovementEntity(
     @PrimaryKey
     val id: String,
